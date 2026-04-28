@@ -1,40 +1,45 @@
 from src.domain.crossword import CrosswordAnswer, CrosswordClue
+from src.retrieval.wordlist import WordList
 from src.solvers.solver import BaseSolver
 
 
 class AlgorithmicSolver(BaseSolver):
 
-    def __init__(self, wordlist: list[str]):
+    def __init__(self, wordlist: WordList):
         self.wordlist = wordlist
-
-    def _matches_constraints(self, 
-                             word: str, 
-                             constraints: dict[int, str] | None) -> bool:
-        if not constraints:
-            return True
-
-        for idx, letter in constraints.items():
-            if idx >= len(word) or word[idx].lower() != letter.lower():
-                return False
-        return True
 
     def solve(self, clue: CrosswordClue) -> list[CrosswordAnswer]:
 
-        candidates = []
+        words = self.wordlist.by_length(clue.length)
+        words = self._filter_by_constraints(words, clue.positional_constraints)
 
-        for word in self.wordlist:
-            if len(word) != clue.length:
-                continue
+        return self._to_answers(words)
 
-            if not self._matches_constraints(word, clue.positional_constraints):
-                continue
+    def _filter_by_constraints(
+        self,
+        words: list[str],
+        constraints: dict[int, str] | None
+    ) -> list[str]:
 
-            candidates.append(
-                CrosswordAnswer(
-                    text=word.upper(),
-                    length=len(word),
-                    positional_text={}
-                )
+        if not constraints:
+            return words
+
+        result = []
+        for word in words:
+            if all(
+                idx < len(word) and word[idx].lower() == letter.lower()
+                for idx, letter in constraints.items()
+            ):
+                result.append(word)
+
+        return result
+
+    def _to_answers(self, words: list[str]) -> list[CrosswordAnswer]:
+        return [
+            CrosswordAnswer(
+                text=w.upper(),
+                length=len(w),
+                positional_text={}
             )
-
-        return candidates[:10]
+            for w in words
+        ]
