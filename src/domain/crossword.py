@@ -21,6 +21,7 @@ class CrosswordGridSquare:
     col: int
     isblack: bool
     solution_text: str | None = None
+    clue_num: int | None = None
 
 
 @dataclass

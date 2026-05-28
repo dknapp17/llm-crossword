@@ -27,8 +27,9 @@ soup = BeautifulSoup(response.text, features='html.parser')
 
 puz_html = soup.find("table", id="PuzTable")
 
-# step 1: parse clue, answer key value pairs
-# step 2: parse puzzle to get letter constraints
+# step1: parse clue, answer key value pairs
+# step2: parse grid to get locations of all squares
+# step3: use clue/answer and grid objects to get CrosswordClue and CrosswordAnswer pairs
     # ex: 1 across. find square 1 and get result of that square 
     # and all squares to the right until black or border
     # ex: 1 down. find square 1 and get result of that square

@@ -63,6 +63,7 @@ class CrosswordGridParser:
             col=col_idx,
             isblack=is_black,
             solution_text=None if is_black else self._extract_letter(cell),
+            clue_num = self._extract_clue_num(cell)
         )
 
     # -------------------------
@@ -78,3 +79,16 @@ class CrosswordGridParser:
             return substr_div.text.strip()
 
         return None
+    
+    def _extract_clue_num(self, cell) -> int | None:
+        num_div = cell.find("div", class_="num")
+
+        if num_div:
+            num_text = num_div.text.strip()
+            return int(num_text) if num_text else None
+
+        return None
+    
+    class CrosswordClueParser:
+        #TODO: take html and parse clue/answer
+        pass
