@@ -49,8 +49,6 @@ clue_answer_pairs = clue_answer_parser.parse(clue_ans_html)
 grid_parser = CrosswordGridParser()
 grid = grid_parser.parse(puz_html)
 
-# print(grid.squares[47])
-# print(clue_ans_html)
 print(f"first clue: {clue_answer_pairs[0].crossword_clue}")
 print(f"first answer: {clue_answer_pairs[0].crossword_answer}")
 
@@ -62,7 +60,6 @@ print(f"first square of clue 1: {grid.get_by_clue_num(1)}")
 # use these together to get SolverClueInput and SolverAnswer
 print(f"parsing a {grid.rows} by {grid.cols} grid")
 for pair in clue_answer_pairs:
-    #TODO: move this into a function and reuse logic for across and down
     clue_num = pair.crossword_clue.clue_num
     start_square = grid.get_by_clue_num(clue_num)
 
@@ -100,6 +97,4 @@ for pair in clue_answer_pairs:
     )
 
     print(solver_clue_input, solver_answer)
-        # print("parsing grid down")
-        # print(f"parsing clue {pair.crossword_clue.clue_num}")
 
