@@ -208,4 +208,38 @@ class CrosswordGridParser:
             return int(num_text) if num_text else None
 
         return None
-    
+
+
+def extract_word_from_grid(
+    grid: CrosswordGrid,
+    start_row: int,
+    start_col: int,
+    delta_row: int,
+    delta_col: int,
+):
+    row, col = start_row, start_col
+
+    positional_text = {}
+    length = 0
+
+    square = grid.get(row, col)
+    positional_text[length] = square.solution_text
+
+    while True:
+        row += delta_row
+        col += delta_col
+
+        if row < 0 or row >= grid.rows:
+            break
+        if col < 0 or col >= grid.cols:
+            break
+
+        square = grid.get(row, col)
+
+        if square.isblack:
+            break
+
+        length += 1
+        positional_text[length] = square.solution_text
+
+    return length + 1, positional_text
