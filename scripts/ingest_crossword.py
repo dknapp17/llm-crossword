@@ -14,7 +14,7 @@ from src.domain.crossword import SolverAnswer, SolverClueInput
 from src.pipeline.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
-    # extract_word_from_grid,
+    extract_word_from_grid,
 )
 
 url = 'https://www.xwordinfo.com/Crossword?date=4/19/2026'
@@ -64,55 +64,42 @@ print(f"parsing a {grid.rows} by {grid.cols} grid")
 for pair in clue_answer_pairs:
     #TODO: move this into a function and reuse logic for across and down
     clue_num = pair.crossword_clue.clue_num
-    if pair.crossword_clue.across_down == 'across':
-        len_counter = 1
-        positional_text = {}
-        is_valid = True
-        print("parsing grid across")
-        print(f"parsing clue {pair.crossword_clue.clue_num}")
-        print(f"first letter of clue: {grid.get_by_clue_num(clue_num)}")
-        cur_square = grid.get_by_clue_num(clue_num=clue_num)
-        cur_row, cur_col = cur_square.row, cur_square.col
-        positional_text[0] = cur_square.solution_text
+    start_square = grid.get_by_clue_num(clue_num)
 
-        while is_valid:
-            cur_col += 1
+    if pair.crossword_clue.across_down == "across":
 
-            if cur_col >= grid.cols:
-                break
-
-            cur_square = grid.squares[cur_row][cur_col]
-
-            if cur_square.isblack:
-                break
-
-            len_counter += 1
-            positional_text[len_counter] = cur_square.solution_text
-
-        # print(f"answer length: {len_counter}")
-        # print(f"positional text: {positional_text}")
-        solver_answer = SolverAnswer(
-            text=pair.crossword_answer.text,
-            length=len_counter,
-            positional_text=positional_text
+        length, positional_text = extract_word_from_grid(
+            grid,
+            start_square.row,
+            start_square.col,
+            delta_row=0,
+            delta_col=1,
         )
-        solver_clue_input = SolverClueInput(
-            text=pair.crossword_clue.text,
-            length=len_counter,
-            weekday_num=0, # add puzzle metadata later
-            positional_constraints={} # add possible positional constraints later
-        )
-        print(solver_answer)
-        print(solver_clue_input)
-
-            
-
-
-
 
 
     else:
-        pass
+        length, positional_text = extract_word_from_grid(
+            grid,
+            start_square.row,
+            start_square.col,
+            delta_row=1,
+            delta_col=0,
+        )
+
+    solver_answer = SolverAnswer(
+            text=pair.crossword_answer.text,
+            length=length,
+            positional_text=positional_text,
+        )
+
+    solver_clue_input = SolverClueInput(
+        text=pair.crossword_clue.text,
+        length=length,
+        weekday_num=0,
+        positional_constraints={},
+    )
+
+    print(solver_clue_input, solver_answer)
         # print("parsing grid down")
         # print(f"parsing clue {pair.crossword_clue.clue_num}")
 
