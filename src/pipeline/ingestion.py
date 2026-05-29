@@ -88,9 +88,9 @@ class CrosswordClueAnswerParser:
         clue_container: Tag,
     ) -> str:
 
-        clue_text = clue_container.contents[0]
+        clue_text = clue_container.contents[0].strip()
 
-        return clue_text.replace(" : ", "").strip()
+        return clue_text.removesuffix(":").strip()
 
     def _extract_answer_text(
         self,
