@@ -156,9 +156,9 @@ class TestCrosswordGridParser(unittest.TestCase):
 
         self.assertEqual(grid.rows, 1)
         self.assertEqual(grid.cols, 2)
-        self.assertEqual(len(grid.squares), 2)
-        self.assertEqual(grid.squares[0].solution_text, "A")
-        self.assertTrue(grid.squares[1].isblack)
+        self.assertEqual(len(grid.squares), 1)
+        self.assertEqual(grid.squares[0][0].solution_text, "A")
+        self.assertTrue(grid.squares[0][1].isblack)
 
 class TestCrosswordClueParser(unittest.TestCase):
 

@@ -46,8 +46,12 @@ grid = grid_parser.parse(puz_html)
 
 # print(grid.squares[47])
 # print(clue_ans_html)
-print(clue_answer_pairs[0].crossword_clue.text)
-print(clue_answer_pairs[0].crossword_answer.text)
+print(f"first clue: {clue_answer_pairs[0].crossword_clue}")
+print(f"first answer: {clue_answer_pairs[0].crossword_answer}")
+
+print(f"square in row 1, column 1: {grid.squares[0][0]}")
+
+print(f" {grid.get_by_clue_num(1)}")
 
 # now we have a grid (collection of squares and a collection of clue answer pairs)
 # use these together to get SolverClueInput and SolverAnswer
