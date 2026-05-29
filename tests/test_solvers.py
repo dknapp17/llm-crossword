@@ -1,6 +1,6 @@
 import unittest
 
-from src.domain.crossword import CrosswordAnswer, SolverClueInput
+from src.domain.crossword import SolverAnswer, SolverClueInput
 from src.retrieval.wordlist import WordList
 from src.solvers.algorithmic_solver import AlgorithmicSolver
 
@@ -55,7 +55,7 @@ class TestAlgorithmicSolver(unittest.TestCase):
 
         results = self.solver.solve(clue)
 
-        self.assertTrue(all(isinstance(r, CrosswordAnswer) for r in results))
+        self.assertTrue(all(isinstance(r, SolverAnswer) for r in results))
 
     def test_empty_result_when_no_match(self):
         clue = SolverClueInput(

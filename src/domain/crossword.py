@@ -32,7 +32,7 @@ class SolverClueInput:
 
 
 @dataclass
-class CrosswordAnswer:
+class SolverAnswer:
     text: str  # ex: DEADHEAT
     length: int
     positional_text: dict[int, str]  # ex: {1: DH, 2: E, 3: A, 4: DT}
