@@ -2,7 +2,12 @@ import unittest
 
 from bs4 import BeautifulSoup
 
-from src.pipeline.ingestion import CrosswordGridParser
+from src.domain.crossword import AcrossDown, CrosswordGridSquare
+from src.pipeline.ingestion import (
+    CrosswordClueAnswerParser,
+    CrosswordGridParser,
+    extract_word_from_grid,
+)
 
 
 class TestCrosswordGridParser(unittest.TestCase):
@@ -155,10 +160,320 @@ class TestCrosswordGridParser(unittest.TestCase):
 
         self.assertEqual(grid.rows, 1)
         self.assertEqual(grid.cols, 2)
-        self.assertEqual(len(grid.squares), 2)
-        self.assertEqual(grid.squares[0].solution_text, "A")
-        self.assertTrue(grid.squares[1].isblack)
+        self.assertEqual(len(grid.squares), 1)
+        self.assertEqual(grid.squares[0][0].solution_text, "A")
+        self.assertTrue(grid.squares[0][1].isblack)
+
+class TestCrosswordClueParser(unittest.TestCase):
+
+    def setUp(self):
+        self.parser = CrosswordClueAnswerParser()
+
+    # -------------------------
+    # Helpers
+    # -------------------------
+    def make_soup(self, html: str):
+        return BeautifulSoup(html, "html.parser")
+
+    # -------------------------
+    # _extract_clue_text
+    # -------------------------
+    def test_extract_clue_text(self):
+
+        soup = self.make_soup("""
+        <div>
+            Feline :
+            <a href="/Finder?w=CAT">CAT</a>
+        </div>
+        """)
+
+        div = soup.find("div")
+
+        result = self.parser._extract_clue_text(div)
+
+        self.assertEqual(result, "Feline")
+
+    # -------------------------
+    # _extract_answer_text
+    # -------------------------
+    def test_extract_answer_text(self):
+
+        soup = self.make_soup("""
+        <div>
+            Feline :
+            <a href="/Finder?w=CAT">CAT</a>
+        </div>
+        """)
+
+        div = soup.find("div")
+
+        result = self.parser._extract_answer_text(div)
+
+        self.assertEqual(result, "CAT")
+
+    def test_extract_answer_text_missing_link(self):
+
+        soup = self.make_soup("""
+        <div>
+            Feline
+        </div>
+        """)
+
+        div = soup.find("div")
+
+        with self.assertRaises(ValueError):
+            self.parser._extract_answer_text(div)
+
+    # -------------------------
+    # _parse_direction
+    # -------------------------
+    def test_parse_direction_across(self):
+
+        html = """
+        <div id="ACluesPan">
+            <div class="numclue">
+                <div>1</div>
+                <div>
+                    Feline :
+                    <a href="/Finder?w=CAT">CAT</a>
+                </div>
+
+                <div>2</div>
+                <div>
+                    Canine :
+                    <a href="/Finder?w=DOG">DOG</a>
+                </div>
+            </div>
+        </div>
+        """
+
+        soup = self.make_soup(html)
+
+        direction_div = soup.find("div", id="ACluesPan")
+
+        results = self.parser._parse_direction(
+            direction_div,
+            AcrossDown.ACROSS,
+        )
+
+        self.assertEqual(len(results), 2)
+
+        first_pair = results[0]
+
+        self.assertEqual(
+            first_pair.crossword_clue.text,
+            "Feline",
+        )
+
+        self.assertEqual(
+            first_pair.crossword_answer.text,
+            "CAT",
+        )
+
+        self.assertEqual(
+            first_pair.crossword_clue.clue_num,
+            1,
+        )
+
+        self.assertEqual(
+            first_pair.crossword_clue.across_down,
+            AcrossDown.ACROSS,
+        )
+
+    def test_parse_direction_none(self):
+
+        results = self.parser._parse_direction(
+            None,
+            AcrossDown.DOWN,
+        )
+
+        self.assertEqual(results, [])
+
+    def test_parse_direction_missing_numclue(self):
+
+        soup = self.make_soup("""
+        <div id="DCluesPan"></div>
+        """)
+
+        direction_div = soup.find("div")
+
+        results = self.parser._parse_direction(
+            direction_div,
+            AcrossDown.DOWN,
+        )
+
+        self.assertEqual(results, [])
+
+    # -------------------------
+    # parse
+    # -------------------------
+    def test_parse_full_cluebox(self):
+
+        html = """
+        <div class="cluebox">
+
+            <div id="ACluesPan">
+                <div class="numclue">
+                    <div>1</div>
+                    <div>
+                        Feline :
+                        <a href="/Finder?w=CAT">CAT</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="DCluesPan">
+                <div class="numclue">
+                    <div>2</div>
+                    <div>
+                        Canine :
+                        <a href="/Finder?w=DOG">DOG</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        """
+
+        soup = self.make_soup(html)
+
+        cluebox = soup.find("div", class_="cluebox")
+
+        results = self.parser.parse(cluebox)
+
+        self.assertEqual(len(results), 2)
+
+        across_pair = results[0]
+        down_pair = results[1]
+
+        self.assertEqual(
+            across_pair.crossword_clue.text,
+            "Feline",
+        )
+
+        self.assertEqual(
+            across_pair.crossword_answer.text,
+            "CAT",
+        )
+
+        self.assertEqual(
+            across_pair.crossword_clue.across_down,
+            AcrossDown.ACROSS,
+        )
+
+        self.assertEqual(
+            down_pair.crossword_clue.text,
+            "Canine",
+        )
+
+        self.assertEqual(
+            down_pair.crossword_answer.text,
+            "DOG",
+        )
+
+        self.assertEqual(
+            down_pair.crossword_clue.across_down,
+            AcrossDown.DOWN,
+        )
+
+class FakeGrid:
+    def __init__(self, squares):
+        self.squares = squares
+        self.rows = len(squares)
+        self.cols = len(squares[0])
+
+    def get(self, row, col):
+        return self.squares[row][col]
 
 
+class TestExtractWordFromGrid(unittest.TestCase):
+
+    def test_across_simple_word(self):
+
+        grid = FakeGrid([
+            [
+                CrosswordGridSquare(0, 0, False, "C"),
+                CrosswordGridSquare(0, 1, False, "A"),
+                CrosswordGridSquare(0, 2, False, "T"),
+            ]
+        ])
+
+        length, positional = extract_word_from_grid(
+            grid,
+            start_row=0,
+            start_col=0,
+            delta_row=0,
+            delta_col=1,
+        )
+
+        self.assertEqual(length, 3)
+        self.assertEqual(positional, {
+            0: "C",
+            1: "A",
+            2: "T",
+        })
+
+    def test_stops_at_black_square(self):
+
+        grid = FakeGrid([
+            [
+                CrosswordGridSquare(0, 0, False, "C"),
+                CrosswordGridSquare(0, 1, True, None),
+                CrosswordGridSquare(0, 2, False, "T"),
+            ]
+        ])
+
+        length, positional = extract_word_from_grid(
+            grid,
+            start_row=0,
+            start_col=0,
+            delta_row=0,
+            delta_col=1,
+        )
+
+        self.assertEqual(length, 1)
+        self.assertEqual(positional, {
+            0: "C"
+        })
+
+    def test_down_word(self):
+
+        grid = FakeGrid([
+            [CrosswordGridSquare(0, 0, False, "C")],
+            [CrosswordGridSquare(1, 0, False, "A")],
+            [CrosswordGridSquare(2, 0, False, "T")],
+        ])
+
+        length, positional = extract_word_from_grid(
+            grid,
+            start_row=0,
+            start_col=0,
+            delta_row=1,
+            delta_col=0,
+        )
+
+        self.assertEqual(length, 3)
+        self.assertEqual(positional, {
+            0: "C",
+            1: "A",
+            2: "T",
+        })
+
+    def test_single_cell_word(self):
+
+        grid = FakeGrid([
+            [CrosswordGridSquare(0, 0, False, "A")]
+        ])
+
+        length, positional = extract_word_from_grid(
+            grid,
+            start_row=0,
+            start_col=0,
+            delta_row=0,
+            delta_col=1,
+        )
+
+        self.assertEqual(length, 1)
+        self.assertEqual(positional, {0: "A"})
 if __name__ == "__main__":
     unittest.main()
