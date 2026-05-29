@@ -1,6 +1,6 @@
 import unittest
 
-from src.domain.crossword import CrosswordAnswer, CrosswordClue
+from src.domain.crossword import CrosswordAnswer, SolverClueInput
 from src.retrieval.wordlist import WordList
 from src.solvers.algorithmic_solver import AlgorithmicSolver
 
@@ -22,7 +22,7 @@ class TestAlgorithmicSolver(unittest.TestCase):
         self.solver = AlgorithmicSolver(self.wordlist)
 
     def test_filters_by_length(self):
-        clue = CrosswordClue(
+        clue = SolverClueInput(
             text="feline",
             length=3,
             weekday_num=1,
@@ -34,7 +34,7 @@ class TestAlgorithmicSolver(unittest.TestCase):
         self.assertTrue(all(len(r.text) == 3 for r in results))
 
     def test_filters_by_constraints(self):
-        clue = CrosswordClue(
+        clue = SolverClueInput(
             text="vehicle",
             length=3,
             weekday_num=1,
@@ -46,7 +46,7 @@ class TestAlgorithmicSolver(unittest.TestCase):
         self.assertTrue(all(r.text.lower().startswith("c") for r in results))
 
     def test_returns_crossword_answers(self):
-        clue = CrosswordClue(
+        clue = SolverClueInput(
             text="animal",
             length=3,
             weekday_num=1,
@@ -58,7 +58,7 @@ class TestAlgorithmicSolver(unittest.TestCase):
         self.assertTrue(all(isinstance(r, CrosswordAnswer) for r in results))
 
     def test_empty_result_when_no_match(self):
-        clue = CrosswordClue(
+        clue = SolverClueInput(
             text="impossible",
             length=3,
             weekday_num=1,

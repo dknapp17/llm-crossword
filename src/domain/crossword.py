@@ -1,8 +1,30 @@
 from dataclasses import dataclass
+from enum import Enum
 
+
+class AcrossDown(str, Enum):
+    ACROSS = "across"
+    DOWN = "down"
 
 @dataclass
 class CrosswordClue:
+    text: str
+    across_down: AcrossDown
+    clue_num: int
+
+@dataclass
+class CrosswordAnswer:
+    text: str
+    across_down: AcrossDown
+    clue_num: int
+
+@dataclass
+class CrosswordClueAnswerPair:
+    crossword_clue: CrosswordClue
+    crossword_answer: CrosswordAnswer
+
+@dataclass
+class SolverClueInput:
     text: str  # ex: Feline
     length: int  # ex: 3
     weekday_num: int  # ex: 1

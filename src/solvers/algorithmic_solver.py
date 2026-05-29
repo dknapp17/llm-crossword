@@ -1,4 +1,4 @@
-from src.domain.crossword import CrosswordAnswer, CrosswordClue
+from src.domain.crossword import CrosswordAnswer, SolverClueInput
 from src.retrieval.wordlist import WordList
 from src.solvers.solver import BaseSolver
 
@@ -8,7 +8,7 @@ class AlgorithmicSolver(BaseSolver):
     def __init__(self, wordlist: WordList):
         self.wordlist = wordlist
 
-    def solve(self, clue: CrosswordClue) -> list[CrosswordAnswer]:
+    def solve(self, clue: SolverClueInput) -> list[CrosswordAnswer]:
 
         words = self.wordlist.by_length(clue.length)
         words = self._filter_by_constraints(words, clue.positional_constraints)
