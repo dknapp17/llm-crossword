@@ -2,8 +2,12 @@ import unittest
 
 from bs4 import BeautifulSoup
 
-from src.domain.crossword import AcrossDown
-from src.pipeline.ingestion import CrosswordClueAnswerParser, CrosswordGridParser
+from src.domain.crossword import AcrossDown, CrosswordGridSquare
+from src.pipeline.ingestion import (
+    CrosswordClueAnswerParser,
+    CrosswordGridParser,
+    extract_word_from_grid,
+)
 
 
 class TestCrosswordGridParser(unittest.TestCase):
@@ -371,5 +375,105 @@ class TestCrosswordClueParser(unittest.TestCase):
             down_pair.crossword_clue.across_down,
             AcrossDown.DOWN,
         )
+
+class FakeGrid:
+    def __init__(self, squares):
+        self.squares = squares
+        self.rows = len(squares)
+        self.cols = len(squares[0])
+
+    def get(self, row, col):
+        return self.squares[row][col]
+
+
+class TestExtractWordFromGrid(unittest.TestCase):
+
+    def test_across_simple_word(self):
+
+        grid = FakeGrid([
+            [
+                CrosswordGridSquare(0, 0, False, "C"),
+                CrosswordGridSquare(0, 1, False, "A"),
+                CrosswordGridSquare(0, 2, False, "T"),
+            ]
+        ])
+
+        length, positional = extract_word_from_grid(
+            grid,
+            start_row=0,
+            start_col=0,
+            delta_row=0,
+            delta_col=1,
+        )
+
+        self.assertEqual(length, 3)
+        self.assertEqual(positional, {
+            0: "C",
+            1: "A",
+            2: "T",
+        })
+
+    def test_stops_at_black_square(self):
+
+        grid = FakeGrid([
+            [
+                CrosswordGridSquare(0, 0, False, "C"),
+                CrosswordGridSquare(0, 1, True, None),
+                CrosswordGridSquare(0, 2, False, "T"),
+            ]
+        ])
+
+        length, positional = extract_word_from_grid(
+            grid,
+            start_row=0,
+            start_col=0,
+            delta_row=0,
+            delta_col=1,
+        )
+
+        self.assertEqual(length, 1)
+        self.assertEqual(positional, {
+            0: "C"
+        })
+
+    def test_down_word(self):
+
+        grid = FakeGrid([
+            [CrosswordGridSquare(0, 0, False, "C")],
+            [CrosswordGridSquare(1, 0, False, "A")],
+            [CrosswordGridSquare(2, 0, False, "T")],
+        ])
+
+        length, positional = extract_word_from_grid(
+            grid,
+            start_row=0,
+            start_col=0,
+            delta_row=1,
+            delta_col=0,
+        )
+
+        self.assertEqual(length, 3)
+        self.assertEqual(positional, {
+            0: "C",
+            1: "A",
+            2: "T",
+        })
+
+    def test_single_cell_word(self):
+
+        grid = FakeGrid([
+            [CrosswordGridSquare(0, 0, False, "A")]
+        ])
+
+        length, positional = extract_word_from_grid(
+            grid,
+            start_row=0,
+            start_col=0,
+            delta_row=0,
+            delta_col=1,
+        )
+
+        self.assertEqual(length, 1)
+        self.assertEqual(positional, {0: "A"})
 if __name__ == "__main__":
     unittest.main()
