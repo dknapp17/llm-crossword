@@ -3,7 +3,7 @@ import unittest
 from bs4 import BeautifulSoup
 
 from src.domain.crossword import AcrossDown, CrosswordGridSquare
-from src.pipeline.ingestion import (
+from src.infrastructure.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
     extract_word_from_grid,
