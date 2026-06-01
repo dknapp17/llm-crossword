@@ -18,7 +18,9 @@ class CrosswordAnswerDocument(NoSQLBaseDocument["CrosswordAnswerDocument"]):
     class Settings:
         name = "crossword_answers"
 
-class CrosswordClueAnswerPairDocument(NoSQLBaseDocument["CrosswordClueAnswerPairDocument"]):
+class CrosswordClueAnswerPairDocument(
+    NoSQLBaseDocument["CrosswordClueAnswerPairDocument"]
+):
     length: int
     clue_text: str
     answer_text: str
