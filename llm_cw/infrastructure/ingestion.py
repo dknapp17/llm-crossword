@@ -1,6 +1,6 @@
 from bs4.element import Tag
 
-from src.domain.crossword import (
+from llm_cw.domain.crossword import (
     AcrossDown,
     CrosswordAnswer,
     CrosswordClue,

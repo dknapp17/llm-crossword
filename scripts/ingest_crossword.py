@@ -10,8 +10,8 @@
 import requests
 from bs4 import BeautifulSoup
 
-from src.domain.crossword import SolverAnswer, SolverClueInput
-from src.pipeline.ingestion import (
+from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
+from llm_cw.infrastructure.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
     extract_word_from_grid,

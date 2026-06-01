@@ -1,8 +1,8 @@
 import streamlit as st
 
-from src.domain.crossword import CrosswordClue
-from src.retrieval.wordlist import WordList
-from src.solvers.algorithmic_solver import AlgorithmicSolver
+from llm_cw.domain.crossword import CrosswordClue
+from llm_cw.retrieval.wordlist import WordList
+from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
 
 
 # --- load solver once ---
