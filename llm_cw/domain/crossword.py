@@ -35,7 +35,7 @@ class SolverClueInput:
 class SolverAnswer:
     text: str  # ex: DEADHEAT
     length: int
-    positional_text: dict[int, str]  # ex: {1: DH, 2: E, 3: A, 4: DT}
+    positional_text: dict[str, str]  # ex: {1: DH, 2: E, 3: A, 4: DT}
 
 @dataclass
 class CrosswordGridSquare:

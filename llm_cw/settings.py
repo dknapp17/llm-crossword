@@ -5,8 +5,8 @@ from pydantic_settings import (
 
 
 class Settings(BaseSettings):
-    mongo_uri: str
-    mongo_database: str = "llm_crossword"
+    MONGO_URI: str
+    MONGO_DATABASE: str = "llm_crossword"
 
     model_config = SettingsConfigDict(
         env_file=".env",

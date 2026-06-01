@@ -11,10 +11,12 @@ import requests
 from bs4 import BeautifulSoup
 
 from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
+from llm_cw.domain.documents import CrosswordClueAnswerPairDocument
 from llm_cw.infrastructure.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
     extract_word_from_grid,
+    to_document,
 )
 
 url = 'https://www.xwordinfo.com/Crossword?date=4/19/2026'
@@ -59,6 +61,7 @@ print(f"first square of clue 1: {grid.get_by_clue_num(1)}")
 # now we have a grid (collection of squares and a collection of clue answer pairs)
 # use these together to get SolverClueInput and SolverAnswer
 print(f"parsing a {grid.rows} by {grid.cols} grid")
+docs = []
 for pair in clue_answer_pairs:
     clue_num = pair.crossword_clue.clue_num
     start_square = grid.get_by_clue_num(clue_num)
@@ -98,3 +101,5 @@ for pair in clue_answer_pairs:
 
     print(solver_clue_input, solver_answer)
 
+    docs.append(to_document(solver_clue_input, solver_answer))
+CrosswordClueAnswerPairDocument.bulk_insert(docs)
