@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "beautifulsoup4>=4.14.3",
+    "loguru>=0.7.3",
+    "pydantic-settings>=2.11.0",
+    "pymongo>=4.17.0",
     "ruff>=0.15.12",
     "streamlit>=1.50.0",
 ]
@@ -16,3 +19,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["llm_cw*"]

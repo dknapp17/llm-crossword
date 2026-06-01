@@ -1,13 +1,16 @@
 from bs4.element import Tag
 
-from src.domain.crossword import (
+from llm_cw.domain.crossword import (
     AcrossDown,
     CrosswordAnswer,
     CrosswordClue,
     CrosswordClueAnswerPair,
     CrosswordGrid,
     CrosswordGridSquare,
+    SolverAnswer,
+    SolverClueInput,
 )
+from llm_cw.domain.documents import CrosswordClueAnswerPairDocument
 
 
 class CrosswordClueAnswerParser:
@@ -223,7 +226,7 @@ def extract_word_from_grid(
     length = 0
 
     square = grid.get(row, col)
-    positional_text[length] = square.solution_text
+    positional_text[f"idx_{length}"] = square.solution_text
 
     while True:
         row += delta_row
@@ -240,6 +243,17 @@ def extract_word_from_grid(
             break
 
         length += 1
-        positional_text[length] = square.solution_text
+        positional_text[f"idx_{length}"] = square.solution_text
 
     return length + 1, positional_text
+
+def to_document(
+        clue: SolverClueInput,
+        answer: SolverAnswer
+    ) -> CrosswordClueAnswerPairDocument:
+    return CrosswordClueAnswerPairDocument(
+        length=clue.length,
+        clue_text=clue.text,
+        answer_text=answer.text,
+        positional_text=answer.positional_text
+    )

@@ -2,8 +2,8 @@ import unittest
 
 from bs4 import BeautifulSoup
 
-from src.domain.crossword import AcrossDown, CrosswordGridSquare
-from src.pipeline.ingestion import (
+from llm_cw.domain.crossword import AcrossDown, CrosswordGridSquare
+from llm_cw.infrastructure.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
     extract_word_from_grid,
@@ -408,9 +408,9 @@ class TestExtractWordFromGrid(unittest.TestCase):
 
         self.assertEqual(length, 3)
         self.assertEqual(positional, {
-            0: "C",
-            1: "A",
-            2: "T",
+            "idx_0": "C",
+            "idx_1": "A",
+            "idx_2": "T",
         })
 
     def test_stops_at_black_square(self):
@@ -433,7 +433,7 @@ class TestExtractWordFromGrid(unittest.TestCase):
 
         self.assertEqual(length, 1)
         self.assertEqual(positional, {
-            0: "C"
+            "idx_0": "C"
         })
 
     def test_down_word(self):
@@ -454,9 +454,9 @@ class TestExtractWordFromGrid(unittest.TestCase):
 
         self.assertEqual(length, 3)
         self.assertEqual(positional, {
-            0: "C",
-            1: "A",
-            2: "T",
+            "idx_0": "C",
+            "idx_1": "A",
+            "idx_2": "T",
         })
 
     def test_single_cell_word(self):
@@ -474,6 +474,6 @@ class TestExtractWordFromGrid(unittest.TestCase):
         )
 
         self.assertEqual(length, 1)
-        self.assertEqual(positional, {0: "A"})
+        self.assertEqual(positional, {"idx_0": "A"})
 if __name__ == "__main__":
     unittest.main()

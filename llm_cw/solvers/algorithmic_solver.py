@@ -1,6 +1,6 @@
-from src.domain.crossword import SolverAnswer, SolverClueInput
-from src.retrieval.wordlist import WordList
-from src.solvers.solver import BaseSolver
+from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
+from llm_cw.retrieval.wordlist import WordList
+from llm_cw.solvers.solver import BaseSolver
 
 
 class AlgorithmicSolver(BaseSolver):

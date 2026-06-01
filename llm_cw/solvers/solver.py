@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from src.domain.crossword import CrosswordAnswer, CrosswordClue
+from llm_cw.domain.crossword import CrosswordAnswer, CrosswordClue
 
 
 class BaseSolver(ABC):

@@ -1,8 +1,8 @@
 import unittest
 
-from src.domain.crossword import SolverAnswer, SolverClueInput
-from src.retrieval.wordlist import WordList
-from src.solvers.algorithmic_solver import AlgorithmicSolver
+from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
+from llm_cw.retrieval.wordlist import WordList
+from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
 
 
 class TestAlgorithmicSolver(unittest.TestCase):
