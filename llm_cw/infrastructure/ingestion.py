@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bs4.element import Tag
 
 from llm_cw.domain.crossword import (
@@ -7,6 +9,7 @@ from llm_cw.domain.crossword import (
     CrosswordClueAnswerPair,
     CrosswordGrid,
     CrosswordGridSquare,
+    CrosswordPuzzleData,
     SolverAnswer,
     SolverClueInput,
 )
@@ -213,6 +216,7 @@ class CrosswordGridParser:
         return None
 
 
+
 def extract_word_from_grid(
     grid: CrosswordGrid,
     start_row: int,
@@ -247,13 +251,26 @@ def extract_word_from_grid(
 
     return length + 1, positional_text
 
+def construct_url_from_date(puzzle_date: datetime) -> str:
+    year = str(puzzle_date.year)
+    month = str(puzzle_date.month)
+    day = str(puzzle_date.day)
+
+    return f"https://www.xwordinfo.com/Crossword?date={month}/{day}/{year}"
+
+def construct_puzzle_data_from_date(puzzle_date: datetime) -> CrosswordPuzzleData:
+    return CrosswordPuzzleData(
+        puzzle_date=puzzle_date,
+        puzzle_dow=puzzle_date.weekday(),
+        puzzle_url=construct_url_from_date(puzzle_date)
+    )
 def to_document(
         clue: SolverClueInput,
-        answer: SolverAnswer
+        answer: SolverAnswer,
+        puzzle_data: CrosswordPuzzleData
     ) -> CrosswordDocument:
     return CrosswordDocument(
-        length=clue.length,
-        clue_text=clue.text,
-        answer_text=answer.text,
-        positional_text=answer.positional_text
+        clue_data=clue,
+        answer_data=answer,
+        puzzle_data=puzzle_data
     )

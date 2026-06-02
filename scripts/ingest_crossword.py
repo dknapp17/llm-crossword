@@ -7,19 +7,32 @@
 
 # first pass at using beautiful soup to scrape crosswords
 
+from datetime import datetime
+
 import requests
 from bs4 import BeautifulSoup
 
 from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
-from llm_cw.domain.documents import CrosswordDocument
 from llm_cw.infrastructure.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
+    construct_puzzle_data_from_date,
+    construct_url_from_date,
     extract_word_from_grid,
     to_document,
 )
 
-url = 'https://www.xwordinfo.com/Crossword?date=4/19/2026'
+# TODO:
+# construct url from date
+# construct headers from date
+# create soup
+
+# parse metadata from soup
+puzzle_date = datetime(2026, 4, 19)
+url = construct_url_from_date(puzzle_date)
+
+puzzle_data = construct_puzzle_data_from_date(puzzle_date)
+
 headers = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -95,11 +108,10 @@ for pair in clue_answer_pairs:
     solver_clue_input = SolverClueInput(
         text=pair.crossword_clue.text,
         length=length,
-        weekday_num=0,
         positional_constraints={},
     )
 
     print(solver_clue_input, solver_answer)
 
-    docs.append(to_document(solver_clue_input, solver_answer))
-CrosswordDocument.bulk_insert(docs)
+    docs.append(to_document(solver_clue_input, solver_answer, puzzle_data))
+# CrosswordDocument.bulk_insert(docs)
