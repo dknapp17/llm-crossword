@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 from enum import Enum
 
 
@@ -22,6 +23,13 @@ class CrosswordAnswer:
 class CrosswordClueAnswerPair:
     crossword_clue: CrosswordClue
     crossword_answer: CrosswordAnswer
+
+@dataclass 
+class CrosswordPuzzleData:
+    puzzle_date: date
+    puzzle_dow: int
+    puzzle_author: str
+    puzzle_url: str
 
 @dataclass
 class SolverClueInput:

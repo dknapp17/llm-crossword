@@ -11,7 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
-from llm_cw.domain.documents import CrosswordClueAnswerPairDocument
+from llm_cw.domain.documents import CrosswordDocument
 from llm_cw.infrastructure.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
@@ -102,4 +102,4 @@ for pair in clue_answer_pairs:
     print(solver_clue_input, solver_answer)
 
     docs.append(to_document(solver_clue_input, solver_answer))
-CrosswordClueAnswerPairDocument.bulk_insert(docs)
+CrosswordDocument.bulk_insert(docs)

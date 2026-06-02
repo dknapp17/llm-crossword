@@ -10,7 +10,7 @@ from llm_cw.domain.crossword import (
     SolverAnswer,
     SolverClueInput,
 )
-from llm_cw.domain.documents import CrosswordClueAnswerPairDocument
+from llm_cw.domain.documents import CrosswordDocument
 
 
 class CrosswordClueAnswerParser:
@@ -250,8 +250,8 @@ def extract_word_from_grid(
 def to_document(
         clue: SolverClueInput,
         answer: SolverAnswer
-    ) -> CrosswordClueAnswerPairDocument:
-    return CrosswordClueAnswerPairDocument(
+    ) -> CrosswordDocument:
+    return CrosswordDocument(
         length=clue.length,
         clue_text=clue.text,
         answer_text=answer.text,
