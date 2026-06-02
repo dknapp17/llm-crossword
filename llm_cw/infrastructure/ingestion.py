@@ -264,6 +264,52 @@ def construct_puzzle_data_from_date(puzzle_date: datetime) -> CrosswordPuzzleDat
         puzzle_dow=puzzle_date.weekday(),
         puzzle_url=construct_url_from_date(puzzle_date)
     )
+
+def build_docs(clue_answer_pairs: list[CrosswordClueAnswerPair],
+               grid: CrosswordGrid,
+               puzzle_data: CrosswordPuzzleData
+    ) -> list[CrosswordDocument]:
+    docs = []
+    for pair in clue_answer_pairs:
+        clue_num = pair.crossword_clue.clue_num
+        start_square = grid.get_by_clue_num(clue_num)
+
+        if pair.crossword_clue.across_down == "across":
+
+            length, positional_text = extract_word_from_grid(
+                grid,
+                start_square.row,
+                start_square.col,
+                delta_row=0,
+                delta_col=1,
+            )
+
+
+        else:
+            length, positional_text = extract_word_from_grid(
+                grid,
+                start_square.row,
+                start_square.col,
+                delta_row=1,
+                delta_col=0,
+            )
+
+        solver_answer = SolverAnswer(
+                text=pair.crossword_answer.text,
+                length=length,
+                positional_text=positional_text,
+            )
+
+        solver_clue_input = SolverClueInput(
+            text=pair.crossword_clue.text,
+            length=length,
+            positional_constraints={},
+        )
+
+        docs.append(to_document(solver_clue_input, solver_answer, puzzle_data))
+        
+    return docs
+
 def to_document(
         clue: SolverClueInput,
         answer: SolverAnswer,
@@ -274,3 +320,11 @@ def to_document(
         answer_data=answer,
         puzzle_data=puzzle_data
     )
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120 Safari/537.36"
+    )
+}
