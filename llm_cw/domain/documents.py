@@ -32,3 +32,8 @@ class CrosswordDocument(
 
     class Settings:
         name = "cw_clue_answer"
+
+class CleanCrosswordDocument():
+    def from_document(CrosswordDocument):
+        pass
+    pass
