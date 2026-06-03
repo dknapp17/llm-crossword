@@ -1,4 +1,9 @@
-from llm_cw.domain.crossword import AcrossDown
+from llm_cw.domain.crossword import (
+    AcrossDown,
+    CrosswordPuzzleData,
+    SolverAnswer,
+    SolverClueInput,
+)
 from llm_cw.infrastructure.warehouse.mongo import NoSQLBaseDocument
 
 
@@ -18,17 +23,12 @@ class CrosswordAnswerDocument(NoSQLBaseDocument["CrosswordAnswerDocument"]):
     class Settings:
         name = "crossword_answers"
 
-class CrosswordClueAnswerPairDocument(
-    NoSQLBaseDocument["CrosswordClueAnswerPairDocument"]
+class CrosswordDocument(
+    NoSQLBaseDocument["CrosswordDocument"]
 ):
-    length: int
-    clue_text: str
-    answer_text: str
-    positional_text: dict
-
-    # optional future ML fields
-    source_url: str | None = None
-    puzzle_date: str | None = None
+    clue_data: SolverClueInput
+    answer_data: SolverAnswer
+    puzzle_data: CrosswordPuzzleData
 
     class Settings:
         name = "cw_clue_answer"

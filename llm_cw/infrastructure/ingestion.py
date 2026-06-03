@@ -1,3 +1,7 @@
+from datetime import datetime
+
+import requests
+from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from llm_cw.domain.crossword import (
@@ -7,10 +11,11 @@ from llm_cw.domain.crossword import (
     CrosswordClueAnswerPair,
     CrosswordGrid,
     CrosswordGridSquare,
+    CrosswordPuzzleData,
     SolverAnswer,
     SolverClueInput,
 )
-from llm_cw.domain.documents import CrosswordClueAnswerPairDocument
+from llm_cw.domain.documents import CrosswordDocument
 
 
 class CrosswordClueAnswerParser:
@@ -91,9 +96,9 @@ class CrosswordClueAnswerParser:
         clue_container: Tag,
     ) -> str:
 
-        clue_text = clue_container.contents[0].strip()
-
-        return clue_text.removesuffix(":").strip()
+        clue_text = clue_container.get_text().strip()
+        
+        return clue_text.rsplit(":", 1)[0].strip()
 
     def _extract_answer_text(
         self,
@@ -213,6 +218,7 @@ class CrosswordGridParser:
         return None
 
 
+
 def extract_word_from_grid(
     grid: CrosswordGrid,
     start_row: int,
@@ -247,13 +253,132 @@ def extract_word_from_grid(
 
     return length + 1, positional_text
 
+def construct_url_from_date(puzzle_date: datetime) -> str:
+    year = str(puzzle_date.year)
+    month = str(puzzle_date.month)
+    day = str(puzzle_date.day)
+
+    return f"https://www.xwordinfo.com/Crossword?date={month}/{day}/{year}"
+
+def construct_puzzle_data_from_date(puzzle_date: datetime) -> CrosswordPuzzleData:
+    return CrosswordPuzzleData(
+        puzzle_date=puzzle_date,
+        puzzle_dow=puzzle_date.weekday(),
+        puzzle_url=construct_url_from_date(puzzle_date)
+    )
+
+def fetch_crossword_page(
+    url: str,
+    session: requests.Session | None = None,
+) -> BeautifulSoup:
+    """
+    Fetch crossword HTML and return parsed BeautifulSoup object.
+    Uses a session if provided (recommended for batch ingestion).
+    """
+
+    session = session or requests.Session()
+
+    try:
+        response = session.get(
+            url,
+            headers=HEADERS,
+            timeout=15,
+        )
+        response.raise_for_status()
+    except requests.RequestException as e:
+        raise RuntimeError(f"Failed to fetch crossword page: {url}") from e
+
+    return BeautifulSoup(response.text, features="html.parser")
+
+def build_docs(clue_answer_pairs: list[CrosswordClueAnswerPair],
+               grid: CrosswordGrid,
+               puzzle_data: CrosswordPuzzleData
+    ) -> list[CrosswordDocument]:
+    docs = []
+    for pair in clue_answer_pairs:
+        clue_num = pair.crossword_clue.clue_num
+        start_square = grid.get_by_clue_num(clue_num)
+
+        if pair.crossword_clue.across_down == "across":
+
+            length, positional_text = extract_word_from_grid(
+                grid,
+                start_square.row,
+                start_square.col,
+                delta_row=0,
+                delta_col=1,
+            )
+
+
+        else:
+            length, positional_text = extract_word_from_grid(
+                grid,
+                start_square.row,
+                start_square.col,
+                delta_row=1,
+                delta_col=0,
+            )
+
+        solver_answer = SolverAnswer(
+                text=pair.crossword_answer.text,
+                length=length,
+                positional_text=positional_text,
+            )
+
+        solver_clue_input = SolverClueInput(
+            text=pair.crossword_clue.text,
+            length=length,
+            positional_constraints={},
+        )
+
+        docs.append(to_document(solver_clue_input, solver_answer, puzzle_data))
+        
+    return docs
+
 def to_document(
         clue: SolverClueInput,
-        answer: SolverAnswer
-    ) -> CrosswordClueAnswerPairDocument:
-    return CrosswordClueAnswerPairDocument(
-        length=clue.length,
-        clue_text=clue.text,
-        answer_text=answer.text,
-        positional_text=answer.positional_text
+        answer: SolverAnswer,
+        puzzle_data: CrosswordPuzzleData
+    ) -> CrosswordDocument:
+    return CrosswordDocument(
+        clue_data=clue,
+        answer_data=answer,
+        puzzle_data=puzzle_data
     )
+
+def ingest_crossword(
+    puzzle_date: datetime,
+) -> list[CrosswordDocument]:
+
+    # 1. build metadata
+    puzzle_data = construct_puzzle_data_from_date(puzzle_date)
+    url = puzzle_data.puzzle_url
+
+    # 2. fetch HTML
+    soup = fetch_crossword_page(url)
+
+    # 3. extract DOM pieces
+    puz_html = soup.find("table", id="PuzTable")
+    clue_ans_html = soup.find("div", id="CPHContent_ClueBox")
+
+    if puz_html is None or clue_ans_html is None:
+        raise ValueError("Malformed crossword page")
+
+    # 4. parse domain objects
+    clue_answer_pairs = CrosswordClueAnswerParser().parse(clue_ans_html)
+    grid = CrosswordGridParser().parse(puz_html)
+
+    # 5. build documents
+    return build_docs(
+        clue_answer_pairs=clue_answer_pairs,
+        grid=grid,
+        puzzle_data=puzzle_data,
+    )
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120 Safari/537.36"
+    )
+}

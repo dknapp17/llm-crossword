@@ -1,12 +1,23 @@
 import unittest
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 
-from llm_cw.domain.crossword import AcrossDown, CrosswordGridSquare
+from llm_cw.domain.crossword import (
+    AcrossDown,
+    CrosswordGridSquare,
+    CrosswordPuzzleData,
+    SolverAnswer,
+    SolverClueInput,
+)
+from llm_cw.domain.documents import CrosswordDocument
 from llm_cw.infrastructure.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
+    construct_puzzle_data_from_date,
+    construct_url_from_date,
     extract_word_from_grid,
+    to_document,
 )
 
 
@@ -475,5 +486,97 @@ class TestExtractWordFromGrid(unittest.TestCase):
 
         self.assertEqual(length, 1)
         self.assertEqual(positional, {"idx_0": "A"})
+
+class TestConstructUrlFromDate(unittest.TestCase):
+
+    def test_construct_url_from_date(self):
+        puzzle_date = datetime(2026, 4, 19)
+
+        url = construct_url_from_date(puzzle_date)
+
+        self.assertEqual(
+            url,
+            "https://www.xwordinfo.com/Crossword?date=4/19/2026",
+        )
+
+
+class TestConstructPuzzleDataFromDate(unittest.TestCase):
+
+    def test_construct_puzzle_data_from_date(self):
+        puzzle_date = datetime(2026, 4, 19)
+
+        puzzle_data = construct_puzzle_data_from_date(puzzle_date)
+
+        self.assertEqual(puzzle_data.puzzle_date, puzzle_date)
+
+        # Sunday = 6 using datetime.weekday()
+        self.assertEqual(puzzle_data.puzzle_dow, 6)
+
+        self.assertEqual(
+            puzzle_data.puzzle_url,
+            "https://www.xwordinfo.com/Crossword?date=4/19/2026",
+        )
+
+    def test_returns_crossword_puzzle_data(self):
+        puzzle_date = datetime(2026, 4, 19)
+
+        puzzle_data = construct_puzzle_data_from_date(puzzle_date)
+
+        self.assertIsInstance(
+            puzzle_data,
+            CrosswordPuzzleData,
+        )
+
+
+class TestToDocument(unittest.TestCase):
+
+    def test_to_document(self):
+        clue = SolverClueInput(
+            text="Alex and ___ (jewelry company)",
+            length=3,
+            positional_constraints={},
+        )
+
+        answer = SolverAnswer(
+            text="ANI",
+            length=3,
+            positional_text={
+                "idx_0": "A",
+                "idx_1": "N",
+                "idx_2": "I",
+            },
+        )
+
+        puzzle_data = CrosswordPuzzleData(
+            puzzle_date=datetime(2026, 4, 19),
+            puzzle_dow=6,
+            puzzle_url="https://www.xwordinfo.com/Crossword?date=4/19/2026",
+        )
+
+        document = to_document(
+            clue=clue,
+            answer=answer,
+            puzzle_data=puzzle_data,
+        )
+
+        self.assertIsInstance(
+            document,
+            CrosswordDocument,
+        )
+
+        self.assertEqual(
+            document.clue_data,
+            clue,
+        )
+
+        self.assertEqual(
+            document.answer_data,
+            answer,
+        )
+
+        self.assertEqual(
+            document.puzzle_data,
+            puzzle_data,
+        )
 if __name__ == "__main__":
     unittest.main()

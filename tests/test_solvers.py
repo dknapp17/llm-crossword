@@ -25,7 +25,6 @@ class TestAlgorithmicSolver(unittest.TestCase):
         clue = SolverClueInput(
             text="feline",
             length=3,
-            weekday_num=1,
             positional_constraints=None
         )
 
@@ -37,7 +36,6 @@ class TestAlgorithmicSolver(unittest.TestCase):
         clue = SolverClueInput(
             text="vehicle",
             length=3,
-            weekday_num=1,
             positional_constraints={0: "c"}  # must start with 'c'
         )
 
@@ -49,7 +47,6 @@ class TestAlgorithmicSolver(unittest.TestCase):
         clue = SolverClueInput(
             text="animal",
             length=3,
-            weekday_num=1,
             positional_constraints=None
         )
 
@@ -61,7 +58,6 @@ class TestAlgorithmicSolver(unittest.TestCase):
         clue = SolverClueInput(
             text="impossible",
             length=3,
-            weekday_num=1,
             positional_constraints={0: "z"}  # no word starts with z in list
         )
 

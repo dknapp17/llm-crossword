@@ -1,105 +1,61 @@
-# TODO: 
+import sys
+import traceback
+from datetime import datetime, timedelta
 
-# create script to ingest crosswords
-# should be able to:
-    # update training data
-    # update word list with new words
-
-# first pass at using beautiful soup to scrape crosswords
-
-import requests
-from bs4 import BeautifulSoup
-
-from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
-from llm_cw.domain.documents import CrosswordClueAnswerPairDocument
-from llm_cw.infrastructure.ingestion import (
-    CrosswordClueAnswerParser,
-    CrosswordGridParser,
-    extract_word_from_grid,
-    to_document,
-)
-
-url = 'https://www.xwordinfo.com/Crossword?date=4/19/2026'
-headers = {
-    "User-Agent": (
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120 Safari/537.36"
-    )
-}
-
-response = requests.get(url, headers=headers)
-
-soup = BeautifulSoup(response.text, features='html.parser')
-
-puz_html = soup.find("table", id="PuzTable")
-
-clue_ans_html = soup.find("div", id="CPHContent_ClueBox")
-
-# step1: parse clue, answer key value pairs
-# step2: parse grid to get locations of all squares
-# step3: use clue/answer and grid objects to get CrosswordClue and CrosswordAnswer pairs
-    # ex: 1 across. find square 1 and get result of that square 
-    # and all squares to the right until black or border
-    # ex: 1 down. find square 1 and get result of that square
-    # and all squares below until black or border
-
-# parse puzzle
-clue_answer_parser = CrosswordClueAnswerParser()
-clue_answer_pairs = clue_answer_parser.parse(clue_ans_html)
-
-grid_parser = CrosswordGridParser()
-grid = grid_parser.parse(puz_html)
-
-print(f"first clue: {clue_answer_pairs[0].crossword_clue}")
-print(f"first answer: {clue_answer_pairs[0].crossword_answer}")
-
-print(f"square in row 3, column 6: {grid.squares[2][5]}")
-
-print(f"first square of clue 1: {grid.get_by_clue_num(1)}")
-
-# now we have a grid (collection of squares and a collection of clue answer pairs)
-# use these together to get SolverClueInput and SolverAnswer
-print(f"parsing a {grid.rows} by {grid.cols} grid")
-docs = []
-for pair in clue_answer_pairs:
-    clue_num = pair.crossword_clue.clue_num
-    start_square = grid.get_by_clue_num(clue_num)
-
-    if pair.crossword_clue.across_down == "across":
-
-        length, positional_text = extract_word_from_grid(
-            grid,
-            start_square.row,
-            start_square.col,
-            delta_row=0,
-            delta_col=1,
-        )
+from llm_cw.domain.documents import CrosswordDocument
+from llm_cw.infrastructure.ingestion import ingest_crossword
 
 
-    else:
-        length, positional_text = extract_word_from_grid(
-            grid,
-            start_square.row,
-            start_square.col,
-            delta_row=1,
-            delta_col=0,
-        )
+def parse_date(arg: str) -> datetime:
+    return datetime.strptime(arg, "%Y-%m-%d")
 
-    solver_answer = SolverAnswer(
-            text=pair.crossword_answer.text,
-            length=length,
-            positional_text=positional_text,
-        )
 
-    solver_clue_input = SolverClueInput(
-        text=pair.crossword_clue.text,
-        length=length,
-        weekday_num=0,
-        positional_constraints={},
-    )
+def iter_dates(start: datetime, end: datetime):
+    current = start
+    while current <= end:
+        yield current
+        current += timedelta(days=1)
 
-    print(solver_clue_input, solver_answer)
 
-    docs.append(to_document(solver_clue_input, solver_answer))
-CrosswordClueAnswerPairDocument.bulk_insert(docs)
+def main():
+    try:
+        if len(sys.argv) < 3:
+            raise ValueError(
+                "Usage: python ingest_crossword.py YYYY-MM-DD YYYY-MM-DD"
+            )
+
+        start_date = parse_date(sys.argv[1])
+        end_date = parse_date(sys.argv[2])
+
+        total_docs = 0
+
+        for puzzle_date in iter_dates(start_date, end_date):
+            print(f"\nIngesting {puzzle_date.date()}...")
+
+            try:
+                docs = ingest_crossword(puzzle_date)
+
+                if not docs:
+                    print(f"No documents generated for {puzzle_date.date()}")
+                    continue
+
+                CrosswordDocument.bulk_insert(docs)
+
+                print(f"Inserted {len(docs)} documents")
+                total_docs += len(docs)
+
+            except Exception as e:
+                print(f"\n❌ Failed ingestion for {puzzle_date.date()}")
+                print(f"Error: {repr(e)}")
+                traceback.print_exc()
+                continue
+
+        print(f"\nDone. Total inserted: {total_docs}")
+
+    except Exception as e:
+        print(f"Failed ingestion run: {e}")
+        raise
+
+
+if __name__ == "__main__":
+    main()
