@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import requests
+from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from llm_cw.domain.crossword import (
@@ -94,9 +96,9 @@ class CrosswordClueAnswerParser:
         clue_container: Tag,
     ) -> str:
 
-        clue_text = clue_container.contents[0].strip()
-
-        return clue_text.removesuffix(":").strip()
+        clue_text = clue_container.get_text().strip()
+        
+        return clue_text.rsplit(":", 1)[0].strip()
 
     def _extract_answer_text(
         self,
@@ -265,6 +267,29 @@ def construct_puzzle_data_from_date(puzzle_date: datetime) -> CrosswordPuzzleDat
         puzzle_url=construct_url_from_date(puzzle_date)
     )
 
+def fetch_crossword_page(
+    url: str,
+    session: requests.Session | None = None,
+) -> BeautifulSoup:
+    """
+    Fetch crossword HTML and return parsed BeautifulSoup object.
+    Uses a session if provided (recommended for batch ingestion).
+    """
+
+    session = session or requests.Session()
+
+    try:
+        response = session.get(
+            url,
+            headers=HEADERS,
+            timeout=15,
+        )
+        response.raise_for_status()
+    except requests.RequestException as e:
+        raise RuntimeError(f"Failed to fetch crossword page: {url}") from e
+
+    return BeautifulSoup(response.text, features="html.parser")
+
 def build_docs(clue_answer_pairs: list[CrosswordClueAnswerPair],
                grid: CrosswordGrid,
                puzzle_data: CrosswordPuzzleData
@@ -319,6 +344,35 @@ def to_document(
         clue_data=clue,
         answer_data=answer,
         puzzle_data=puzzle_data
+    )
+
+def ingest_crossword(
+    puzzle_date: datetime,
+) -> list[CrosswordDocument]:
+
+    # 1. build metadata
+    puzzle_data = construct_puzzle_data_from_date(puzzle_date)
+    url = puzzle_data.puzzle_url
+
+    # 2. fetch HTML
+    soup = fetch_crossword_page(url)
+
+    # 3. extract DOM pieces
+    puz_html = soup.find("table", id="PuzTable")
+    clue_ans_html = soup.find("div", id="CPHContent_ClueBox")
+
+    if puz_html is None or clue_ans_html is None:
+        raise ValueError("Malformed crossword page")
+
+    # 4. parse domain objects
+    clue_answer_pairs = CrosswordClueAnswerParser().parse(clue_ans_html)
+    grid = CrosswordGridParser().parse(puz_html)
+
+    # 5. build documents
+    return build_docs(
+        clue_answer_pairs=clue_answer_pairs,
+        grid=grid,
+        puzzle_data=puzzle_data,
     )
 
 HEADERS = {
