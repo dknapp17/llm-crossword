@@ -68,7 +68,8 @@ class TestCrosswordGridParser(unittest.TestCase):
 
     def test_extract_letter_none(self):
         cell = self.make_cell("<td></td>")
-        self.assertIsNone(self.parser._extract_letter(cell))
+        with self.assertRaises(ValueError):
+            self.parser._extract_letter(cell)
 
     # -------------------------
     # _extract_clue_num

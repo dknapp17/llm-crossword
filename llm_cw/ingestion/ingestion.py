@@ -188,21 +188,30 @@ class CrosswordGridParser:
     # -------------------------
     # Atom logic
     # -------------------------
-    def _extract_letter(
-        self,
-        cell,
-    ) -> str | None:
-
+    def _extract_letter(self, cell) -> str:
         letter_div = cell.find("div", class_="letter")
         substr_div = cell.find("div", class_="subst")
+        substr2_div = cell.find("div", class_="subst2")
 
         if letter_div:
-            return letter_div.text.strip()
+            text = letter_div.text.strip()
+            if text:
+                return text
 
         if substr_div:
-            return substr_div.text.strip()
+            text = substr_div.text.strip()
+            if text:
+                return text
 
-        return None
+        if substr2_div:
+            text = substr2_div.text.strip()
+            if text:
+                return text
+
+        raise ValueError(
+            f"Could not extract letter from cell. "
+            f"Available HTML: {str(cell)[:200]}"
+        )
 
     def _extract_clue_num(
         self,
