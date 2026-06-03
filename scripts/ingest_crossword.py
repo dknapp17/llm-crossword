@@ -3,7 +3,7 @@ import traceback
 from datetime import datetime, timedelta
 
 from llm_cw.domain.documents import CrosswordDocument
-from llm_cw.infrastructure.ingestion import ingest_crossword
+from llm_cw.ingestion import ingest_crossword
 
 
 def parse_date(arg: str) -> datetime:

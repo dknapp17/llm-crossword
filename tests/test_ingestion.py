@@ -11,7 +11,7 @@ from llm_cw.domain.crossword import (
     SolverClueInput,
 )
 from llm_cw.domain.documents import CrosswordDocument
-from llm_cw.infrastructure.ingestion import (
+from llm_cw.ingestion.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
     construct_puzzle_data_from_date,
