@@ -32,3 +32,12 @@ class CrosswordDocument(
 
     class Settings:
         name = "cw_clue_answer"
+
+class CleanCrosswordDocument(CrosswordDocument):
+    cleaned_clue_text: str
+    cleaned_answer_text: str
+
+    is_clean: bool=True
+
+    class Settings:
+        name = "cw_clean"

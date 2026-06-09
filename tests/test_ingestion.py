@@ -11,7 +11,7 @@ from llm_cw.domain.crossword import (
     SolverClueInput,
 )
 from llm_cw.domain.documents import CrosswordDocument
-from llm_cw.infrastructure.ingestion import (
+from llm_cw.ingestion.ingestion import (
     CrosswordClueAnswerParser,
     CrosswordGridParser,
     construct_puzzle_data_from_date,
@@ -68,7 +68,8 @@ class TestCrosswordGridParser(unittest.TestCase):
 
     def test_extract_letter_none(self):
         cell = self.make_cell("<td></td>")
-        self.assertIsNone(self.parser._extract_letter(cell))
+        with self.assertRaises(ValueError):
+            self.parser._extract_letter(cell)
 
     # -------------------------
     # _extract_clue_num
