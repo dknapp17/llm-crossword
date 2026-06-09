@@ -41,3 +41,10 @@ class CleanCrosswordDocument(CrosswordDocument):
 
     class Settings:
         name = "cw_clean"
+
+class EmbeddedCrosswordDocument(CleanCrosswordDocument):
+    clue_embedding: list[float] | None
+    answer_embedding: list[float] | None
+    
+    class Settings:
+        name = "cw_embedded"

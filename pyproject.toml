@@ -10,6 +10,7 @@ dependencies = [
     "pydantic-settings>=2.11.0",
     "pymongo>=4.17.0",
     "ruff>=0.15.12",
+    "sentence-transformers>=5.1.2",
     "streamlit>=1.50.0",
 ]
 
