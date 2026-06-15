@@ -13,4 +13,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    EMBEDDING_MODEL_ID: str = "sentence-transformers/all-MiniLM-L6-v2"
+    EMBEDDING_DEVICE: str = "cpu"
+
 settings = Settings()

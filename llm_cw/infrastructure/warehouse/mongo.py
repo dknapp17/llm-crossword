@@ -94,6 +94,17 @@ class NoSQLBaseDocument(BaseModel, ABC, Generic[T]):
         except errors.PyMongoError:
             logger.exception("Failed to query documents")
             return []
+        
+    @classmethod
+    def get_by_id(cls: Type[T], doc_id: str) -> T | None:
+        collection = _database[cls.get_collection_name()]
+
+        doc = collection.find_one({"_id": doc_id})
+
+        if doc:
+            return cls.from_mongo(doc)
+
+        return None
 
     @classmethod
     def get_or_create(cls: Type[T], **filters) -> T:
