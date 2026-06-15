@@ -31,43 +31,41 @@ def main():
     if not target_doc:
         raise ValueError(f"Document not found: {doc_id}")
 
-    all_docs = EmbeddedCrosswordDocument.find()
 
-    results = []
 
-    for doc in all_docs:
-
-        if doc.id == target_doc.id:
-            continue
-
-        similarity = cosine_similarity(
-            target_doc.clue_embedding,
-            doc.clue_embedding,
-        )
-
-        results.append((similarity, doc))
-
-    results.sort(
-        key=lambda x: x[0],
-        reverse=True,
+    results = EmbeddedCrosswordDocument.vector_search(
+        embedding=target_doc.clue_embedding,
+        limit=6,
     )
 
-    print()
-    print("TARGET")
-    print("-" * 80)
-    print(target_doc.cleaned_clue_text)
-    print(f"ANSWER: {target_doc.cleaned_answer_text}")
-    print()
+    matches = []
+
+    for result in results:
+
+        if result["_id"] == str(target_doc.id):
+            continue
+
+        score = result["score"]
+
+        matches.append((score, result))
+
+    
+    print(
+            f"TARGET CLUE: "
+            f"{target_doc.cleaned_clue_text} -> "
+            f"{target_doc.cleaned_answer_text} | "
+            f"{target_doc.id}"
+        )
 
     print("TOP 5 SIMILAR")
     print("-" * 80)
+    
+    for score, doc in matches[:5]:
 
-    for similarity, doc in results[:5]:
         print(
-            f"{similarity:.4f} | "
-            f"{doc.cleaned_clue_text} -> "
-            f"{doc.cleaned_answer_text} | "
-            f"{doc.id}"
+            f"CLUE: {doc['cleaned_clue_text']} "
+            f"ANSWER: {doc['cleaned_answer_text']} "
+            f"CLUE SIMILARITY SCORE: {doc['score']}"
         )
 
 
