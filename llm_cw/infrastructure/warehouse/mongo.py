@@ -134,6 +134,40 @@ class NoSQLBaseDocument(BaseModel, ABC, Generic[T]):
             logger.exception("bulk insert failed")
             return False
 
+    @classmethod
+    def vector_search(
+        cls,
+        embedding: list[float],
+        limit: int = 5,
+    ) -> list[dict]:
+
+        collection = _database[cls.get_collection_name()]
+
+        pipeline = [
+            {
+                "$vectorSearch": {
+                    "index": "clue_embedding_index",
+                    "path": "clue_embedding",
+                    "queryVector": embedding,
+                    "numCandidates": 100,
+                    "limit": limit,
+                }
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "cleaned_clue_text": 1,
+                    "cleaned_answer_text": 1,
+                    "clue_embedding": 1,
+                    "score": {
+                        "$meta": "vectorSearchScore"
+                    },
+                }
+            },
+        ]
+
+        return list(collection.aggregate(pipeline))
+
     # -------------------------
     # required by subclasses
     # -------------------------
