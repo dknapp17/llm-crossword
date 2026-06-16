@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from langchain import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel
 
-from llm_cw.domain.queries import Query
+from llm_cw.domain.queries import CrosswordQuery
 
 
 class PromptTemplateFactory(ABC, BaseModel):
@@ -18,5 +18,5 @@ class RAGStep(ABC):
         self._mock = mock
 
     @abstractmethod
-    def generate(self, query: Query, *args, **kwargs) -> Any:
+    def generate(self, query: CrosswordQuery, *args, **kwargs) -> Any:
         pass

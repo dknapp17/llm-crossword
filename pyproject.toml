@@ -5,14 +5,20 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "accelerate>=1.10.1",
     "beautifulsoup4>=4.14.3",
     "langchain>=0.3.30",
+    "langchain-ollama>=0.3.10",
+    "langchain-openai>=0.3.35",
     "loguru>=0.7.3",
     "pydantic-settings>=2.11.0",
     "pymongo>=4.17.0",
     "ruff>=0.15.12",
     "sentence-transformers>=5.1.2",
+    "sentencepiece>=0.2.1",
     "streamlit>=1.50.0",
+    "torch>=2.8.0",
+    "transformers>=4.57.6",
 ]
 
 [tool.ruff]

@@ -16,4 +16,5 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL_ID: str = "sentence-transformers/all-MiniLM-L6-v2"
     EMBEDDING_DEVICE: str = "cpu"
 
+    HF_MODEL_ID: str = "Qwen/Qwen2.5-3B-Instruct"
 settings = Settings()
