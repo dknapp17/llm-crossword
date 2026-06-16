@@ -9,7 +9,7 @@ from llm_cw.rag.query_expansion import QueryExpansion
 def main():
 
     query = CrosswordQuery.from_str(
-        "African giant",
+        "Fine Fodder for a Freudian analyst",
         answer_length=8,
         clue_num=12,
         across_down="across",
