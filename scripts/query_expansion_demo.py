@@ -1,18 +1,17 @@
 # scripts/query_expansion_demo.py
 
-from pprint import pprint
-
+from llm_cw.domain.documents import EmbeddedCrosswordDocument
 from llm_cw.domain.queries import CrosswordQuery
+from llm_cw.preprocessing.embedding import embed_queries
 from llm_cw.rag.query_expansion import QueryExpansion
 
+#TODO: add embedding to expander
 
 def main():
 
     query = CrosswordQuery.from_str(
-        "Fine Fodder for a Freudian analyst",
+        "Military position",
         answer_length=8,
-        clue_num=12,
-        across_down="across",
     )
 
     expander = QueryExpansion()
@@ -21,6 +20,8 @@ def main():
         query=query,
         expand_to_n=5,
     )
+
+    embedded_queries = embed_queries(expanded_queries)
 
     print()
     print("ORIGINAL QUERY")
@@ -31,16 +32,30 @@ def main():
     print("EXPANDED QUERIES")
     print("-" * 80)
 
-    for i, expanded_query in enumerate(expanded_queries, start=1):
-        print(f"{i}. {expanded_query.content}")
+    for i, embedded_query in enumerate(embedded_queries, start=1):
+        print(f"{i}. {embedded_query.content}")
 
-    print()
-    print("FULL OBJECTS")
-    print("-" * 80)
+        results = EmbeddedCrosswordDocument.vector_search(
+            embedding=embedded_query.embedding,
+            limit=3
+        )
+        matches = []
+        for result in results:
 
-    for query in expanded_queries:
-        pprint(query.model_dump())
-        print()
+            score = result["score"]
+
+            matches.append((score, result))
+
+        print("TOP 3 SIMILAR CLUES")
+        
+        for score, doc in matches[:3]:
+
+            print(
+                f"CLUE: {doc['cleaned_clue_text']} | "
+                f"ANSWER: {doc['cleaned_answer_text']} | "
+                f"CLUE SIMILARITY SCORE: {doc['score']}"
+            )
+        print("_" * 80)
 
 
 if __name__ == "__main__":

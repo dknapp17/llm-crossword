@@ -3,6 +3,7 @@ from functools import cached_property
 from sentence_transformers import SentenceTransformer
 
 from llm_cw.domain.documents import CleanCrosswordDocument, EmbeddedCrosswordDocument
+from llm_cw.domain.queries import CrosswordQuery, EmbeddedCrosswordQuery
 from llm_cw.settings import settings
 
 
@@ -54,10 +55,10 @@ def embed_documents(
     documents: list[CleanCrosswordDocument],
 ) -> list[EmbeddedCrosswordDocument]:
 
-    cleaned_docs = []
+    embedded_docs = []
 
     for doc in documents:
-        cleaned_docs.append(
+        embedded_docs.append(
             EmbeddedCrosswordDocument(
                 clue_data=doc.clue_data,
                 answer_data=doc.answer_data,
@@ -70,4 +71,20 @@ def embed_documents(
             )
         )
 
-    return cleaned_docs
+    return embedded_docs
+
+def embed_queries(
+    queries: list[CrosswordQuery],
+) -> list[EmbeddedCrosswordQuery]:
+
+    embedded_queries = []
+
+    for query in queries:
+        embedded_queries.append(
+            EmbeddedCrosswordQuery(
+                content=query.content,
+                embedding=embed_text(query.content)
+            )
+        )
+
+    return embedded_queries

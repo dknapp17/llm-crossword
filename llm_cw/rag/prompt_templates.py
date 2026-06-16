@@ -9,6 +9,19 @@ class QueryExpansionTemplate(PromptTemplateFactory):
     retrieve relevant documents from a vector database. By generating multiple 
     perspectives on the clue, you can uncover multiple meanings and detect wordplay. 
     Keep alternatives short and concise.
+
+    Return ONLY the rewritten queries.
+        - One query per line
+        - No numbering
+        - No explanations
+        - No bullets
+        - No extra text
+
+        Example output:
+        Military rank highest authority
+        Supreme command military rank
+        Top level military position
+        Highest military grade
     Provide these alternative clues seperated by '{separator}'.
     Original question: {question}"""
 
