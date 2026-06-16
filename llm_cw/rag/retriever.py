@@ -1,8 +1,10 @@
 import concurrent.futures
 
 from llm_cw.domain.documents import EmbeddedCrosswordDocument
-from llm_cw.domain.queries import CrosswordQuery
+from llm_cw.domain.queries import CrosswordQuery, EmbeddedCrosswordQuery
+from llm_cw.preprocessing.embedding import embed_query
 from llm_cw.rag import QueryExpansion
+from llm_cw.utils import cw_utils
 
 # from .reranking import Reranker
 
@@ -26,61 +28,61 @@ class ContextRetriever:
         )
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            search_tasks = [executor.submit(self._search, _query_model, k) for _query_model in n_generated_queries]
-
-            n_k_documents = [task.result() for task in concurrent.futures.as_completed(search_tasks)]
-            n_k_documents = utils.misc.flatten(n_k_documents)
+            search_tasks = [
+                executor.submit(
+                    self._search,
+                    _query_model,
+                    k,
+                )
+                for _query_model in n_generated_queries
+            ]
+            n_k_documents = [
+                task.result() 
+                for task in concurrent.futures.as_completed(search_tasks)
+            ]
+            n_k_documents = cw_utils.flatten(n_k_documents)
             n_k_documents = list(set(n_k_documents))
 
 
         if len(n_k_documents) > 0:
-            k_documents = self.rerank(query, chunks=n_k_documents, keep_top_k=k)
+            k_documents = self.rerank()
         else:
             k_documents = []
 
         return k_documents
 
-    def _search(self, query: Query, k: int = 3) -> list[EmbeddedCrosswordDocument]:
+    def _search(
+            self, 
+            query: CrosswordQuery,
+              k: int = 3
+        ) -> list[EmbeddedCrosswordDocument]:
         assert k >= 3, "k should be >= 3"
 
-        def _search_data_category(
-            data_category_odm: type[EmbeddedChunk], embedded_query: EmbeddedQuery
-        ) -> list[EmbeddedChunk]:
-            if embedded_query.author_id:
-                query_filter = Filter(
-                    must=[
-                        FieldCondition(
-                            key="author_id",
-                            match=MatchValue(
-                                value=str(embedded_query.author_id),
-                            ),
-                        )
-                    ]
-                )
-            else:
-                query_filter = None
+        # TODO: add filtering
+        # query_filter = None
 
-            return data_category_odm.search(
-                query_vector=embedded_query.embedding,
-                limit=k // 3,
-                query_filter=query_filter,
-            )
+        embedded_query: EmbeddedCrosswordQuery = embed_query(query)
 
-        embedded_query: EmbeddedQuery = EmbeddingDispatcher.dispatch(query)
+        retrieved_docs = EmbeddedCrosswordDocument.vector_search(
+            embedding=embedded_query.embedding,
+            limit=3
+        )
+        # retrieved_chunks = post_chunks + articles_chunks + repositories_chunks
 
-        post_chunks = _search_data_category(EmbeddedPostChunk, embedded_query)
-        articles_chunks = _search_data_category(EmbeddedArticleChunk, embedded_query)
-        repositories_chunks = _search_data_category(EmbeddedRepositoryChunk, embedded_query)
+        return retrieved_docs
+    
+    def rerank(self, n_k_documents: list):
+        return n_k_documents
 
-        retrieved_chunks = post_chunks + articles_chunks + repositories_chunks
-
-        return retrieved_chunks
-
-    # def rerank(self, query: str | Query, chunks: list[EmbeddedChunk], keep_top_k: int) -> list[EmbeddedChunk]:
+    # def rerank(self, 
+    # query: str | Query, chunks: list[EmbeddedChunk], 
+    # keep_top_k: int) -> list[EmbeddedChunk]:
     #     if isinstance(query, str):
     #         query = Query.from_str(query)
 
-    #     reranked_documents = self._reranker.generate(query=query, chunks=chunks, keep_top_k=keep_top_k)
+    #     reranked_documents = self._reranker.generate(query=query, 
+    # chunks=chunks, 
+    # keep_top_k=keep_top_k)
 
     #     logger.info(f"{len(reranked_documents)} documents reranked successfully.")
 

@@ -73,6 +73,16 @@ def embed_documents(
 
     return embedded_docs
 
+def embed_query(query: CrosswordQuery) -> EmbeddedCrosswordQuery:
+
+
+    embedded_query = EmbeddedCrosswordQuery(
+        content=query.content,
+        embedding=embed_text(query.content)
+    )
+
+    return embedded_query
+
 def embed_queries(
     queries: list[CrosswordQuery],
 ) -> list[EmbeddedCrosswordQuery]:
