@@ -2,6 +2,7 @@ import concurrent.futures
 
 from llm_cw.domain.documents import EmbeddedCrosswordDocument
 from llm_cw.domain.queries import CrosswordQuery, EmbeddedCrosswordQuery
+from llm_cw.domain.search import VectorSearchResult
 from llm_cw.preprocessing.embedding import embed_query
 from llm_cw.rag.query_expansion import QueryExpansion
 from llm_cw.rag.reranker import Reranker
@@ -17,7 +18,7 @@ class ContextRetriever:
         query: str,
         k: int = 3,
         expand_to_n_queries: int = 3,
-    ) -> list[dict]:
+    ) -> list[VectorSearchResult]:
 
         query_model = CrosswordQuery.from_str(query)
 
@@ -43,49 +44,62 @@ class ContextRetriever:
                 n_k_documents.extend(task.result())
 
         # dedupe by mongo _id
-        unique_docs = {}
+        #TODO: put this in a function
+        seen = set()
+        deduped = []
 
         for doc in n_k_documents:
-            unique_docs[str(doc["_id"])] = doc
+            if doc.id in seen:
+                continue
+            seen.add(doc.id)
+            deduped.append(doc)
 
-        n_k_documents = list(unique_docs.values())
+        n_k_documents = deduped
+        # unique_docs = {}
 
-        if len(n_k_documents) > 0:
-            k_documents = self.rerank(
-                query=query_model,
-                docs=n_k_documents,
-                keep_top_k=k,
-            )
-        else:
-            k_documents = []
+        # for doc in n_k_documents:
+        #     unique_docs[str(doc["_id"])] = doc
 
-        return k_documents
+        # n_k_documents = list(unique_docs.values())
+
+        # if len(n_k_documents) > 0:
+        #     k_documents = self.rerank(
+        #         query=query_model,
+        #         docs=n_k_documents,
+        #         keep_top_k=k,
+        #     )
+        # else:
+        #     k_documents = []
+
+        return n_k_documents
 
     def _search(
-            self, 
-            query: CrosswordQuery,
-              k: int = 3
-        ) -> list[EmbeddedCrosswordDocument]:
+        self,
+        query: CrosswordQuery,
+        k: int = 3
+    ) -> list[VectorSearchResult]:
         assert k >= 3, "k should be >= 3"
-
-        # TODO: add filtering
-        # query_filter = None
 
         embedded_query: EmbeddedCrosswordQuery = embed_query(query)
 
-        retrieved_docs = EmbeddedCrosswordDocument.vector_search(
+        raw_results = EmbeddedCrosswordDocument.vector_search(
             embedding=embedded_query.embedding,
-            limit=3
+            limit=k
         )
 
-        return retrieved_docs
+        results: list[VectorSearchResult] = [
+            VectorSearchResult.from_mongo(doc)
+            for doc in raw_results
+        ]
+
+        return results
     
     
     def rerank(self,
                query: str | CrosswordQuery, 
-               docs: list[EmbeddedCrosswordDocument], 
+               docs: list[VectorSearchResult], 
                keep_top_k: int=3
-        ) -> list[EmbeddedCrosswordDocument]:
+        ) -> list[VectorSearchResult]:
         
         if isinstance(query, str):
             query = CrosswordQuery.from_str(query)

@@ -30,9 +30,9 @@ def main():
     for idx, doc in enumerate(results, start=1):
 
         print()
-        print(f"{idx}. {doc['clue_data']['text']}")
-        print(f"   ANSWER: {doc['answer_data']['text']}")
-        print(f"   ID: {doc['_id']}")
+        print(f"{idx}. {doc.cleaned_clue_text}")
+        print(f"   ANSWER: {doc.cleaned_answer_text}")
+        print(f"   ID: {doc.id}")
 
 
 if __name__ == "__main__":
