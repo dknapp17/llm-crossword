@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from llm_cw.domain.crossword import (
     AcrossDown,
     CrosswordPuzzleData,
@@ -48,3 +50,8 @@ class EmbeddedCrosswordDocument(CleanCrosswordDocument):
     
     class Settings:
         name = "cw_embedded"
+
+@dataclass
+class VectorSearchResult:
+    doc: EmbeddedCrosswordDocument
+    score: float

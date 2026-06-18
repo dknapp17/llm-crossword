@@ -17,4 +17,8 @@ class Settings(BaseSettings):
     EMBEDDING_DEVICE: str = "cpu"
 
     HF_MODEL_ID: str = "Qwen/Qwen2.5-3B-Instruct"
+
+    RERANKING_CROSS_ENCODER_MODEL_ID: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    RAG_MODEL_DEVICE: str = "cpu"
+
 settings = Settings()

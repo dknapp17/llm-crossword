@@ -3,31 +3,31 @@ import concurrent.futures
 from llm_cw.domain.documents import EmbeddedCrosswordDocument
 from llm_cw.domain.queries import CrosswordQuery, EmbeddedCrosswordQuery
 from llm_cw.preprocessing.embedding import embed_query
-from llm_cw.rag import QueryExpansion
-from llm_cw.utils import cw_utils
-
-# from .reranking import Reranker
+from llm_cw.rag.query_expansion import QueryExpansion
+from llm_cw.rag.reranker import Reranker
 
 
 class ContextRetriever:
     def __init__(self, mock: bool = False) -> None:
-        self._query_expander = QueryExpansion(mock=mock)
-        # self._reranker = Reranker(mock=mock)
+        self._query_expander = QueryExpansion()
+        self._reranker = Reranker()
 
     def search(
         self,
         query: str,
         k: int = 3,
         expand_to_n_queries: int = 3,
-    ) -> list:
+    ) -> list[dict]:
+
         query_model = CrosswordQuery.from_str(query)
 
         n_generated_queries = self._query_expander.generate(
-            query_model, 
-            expand_to_n=expand_to_n_queries
+            query_model,
+            expand_to_n=expand_to_n_queries,
         )
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
+
             search_tasks = [
                 executor.submit(
                     self._search,
@@ -36,16 +36,26 @@ class ContextRetriever:
                 )
                 for _query_model in n_generated_queries
             ]
-            n_k_documents = [
-                task.result() 
-                for task in concurrent.futures.as_completed(search_tasks)
-            ]
-            n_k_documents = cw_utils.flatten(n_k_documents)
-            n_k_documents = list(set(n_k_documents))
 
+            n_k_documents = []
+
+            for task in concurrent.futures.as_completed(search_tasks):
+                n_k_documents.extend(task.result())
+
+        # dedupe by mongo _id
+        unique_docs = {}
+
+        for doc in n_k_documents:
+            unique_docs[str(doc["_id"])] = doc
+
+        n_k_documents = list(unique_docs.values())
 
         if len(n_k_documents) > 0:
-            k_documents = self.rerank()
+            k_documents = self.rerank(
+                query=query_model,
+                docs=n_k_documents,
+                keep_top_k=k,
+            )
         else:
             k_documents = []
 
@@ -67,23 +77,22 @@ class ContextRetriever:
             embedding=embedded_query.embedding,
             limit=3
         )
-        # retrieved_chunks = post_chunks + articles_chunks + repositories_chunks
 
         return retrieved_docs
     
-    def rerank(self, n_k_documents: list):
-        return n_k_documents
+    
+    def rerank(self,
+               query: str | CrosswordQuery, 
+               docs: list[EmbeddedCrosswordDocument], 
+               keep_top_k: int=3
+        ) -> list[EmbeddedCrosswordDocument]:
+        
+        if isinstance(query, str):
+            query = CrosswordQuery.from_str(query)
 
-    # def rerank(self, 
-    # query: str | Query, chunks: list[EmbeddedChunk], 
-    # keep_top_k: int) -> list[EmbeddedChunk]:
-    #     if isinstance(query, str):
-    #         query = Query.from_str(query)
+        reranked_documents = self._reranker.generate(query=query, 
+                                                     docs=docs, 
+                                                     keep_top_k=keep_top_k
+        )
 
-    #     reranked_documents = self._reranker.generate(query=query, 
-    # chunks=chunks, 
-    # keep_top_k=keep_top_k)
-
-    #     logger.info(f"{len(reranked_documents)} documents reranked successfully.")
-
-    #     return reranked_documents
+        return reranked_documents
