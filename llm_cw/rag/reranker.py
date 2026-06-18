@@ -1,5 +1,5 @@
-from llm_cw.domain.documents import EmbeddedCrosswordDocument
 from llm_cw.domain.queries import CrosswordQuery
+from llm_cw.domain.search import VectorSearchResult
 from llm_cw.preprocessing.embedding import CrossEncoderModelSingleton
 
 from .base import RAGStep
@@ -12,12 +12,12 @@ class Reranker(RAGStep):
         self._model = CrossEncoderModelSingleton()
 
     def generate(self, query: CrosswordQuery, 
-                 docs: list[EmbeddedCrosswordDocument], 
-                 keep_top_k: int) -> list[EmbeddedCrosswordDocument]:
+                 docs: list[VectorSearchResult], 
+                 keep_top_k: int) -> list[VectorSearchResult]:
         if self._mock:
             return docs
 
-        query_doc_tuples = [(query.content, doc['clue_data']['text']) for doc in docs]
+        query_doc_tuples = [(query.content, doc.cleaned_clue_text) for doc in docs]
         scores = self._model(query_doc_tuples)
 
         scored_query_doc_tuples = list(zip(scores, docs, strict=False))

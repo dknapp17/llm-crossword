@@ -62,16 +62,16 @@ class ContextRetriever:
 
         # n_k_documents = list(unique_docs.values())
 
-        # if len(n_k_documents) > 0:
-        #     k_documents = self.rerank(
-        #         query=query_model,
-        #         docs=n_k_documents,
-        #         keep_top_k=k,
-        #     )
-        # else:
-        #     k_documents = []
+        if len(n_k_documents) > 0:
+            k_documents = self.rerank(
+                query=query_model,
+                docs=n_k_documents,
+                keep_top_k=k,
+            )
+        else:
+            k_documents = []
 
-        return n_k_documents
+        return k_documents
 
     def _search(
         self,
