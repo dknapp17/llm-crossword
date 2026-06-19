@@ -13,8 +13,6 @@ class CrosswordQuery(NoSQLBaseDocument["CrosswordQuery"]):
 
     # crossword-specific context
     answer_length: int | None = None
-    clue_num: int | None = None
-    across_down: str | None = None  # "across" | "down"
 
     # query expansion metadata
     expansion_type: str | None = None  # "base", "expanded", "length_hint", etc.
@@ -33,15 +31,11 @@ class CrosswordQuery(NoSQLBaseDocument["CrosswordQuery"]):
         query: str,
         *,
         answer_length: int | None = None,
-        clue_num: int | None = None,
-        across_down: str | None = None,
         expansion_type: str | None = None,
     ) -> "CrosswordQuery":
         return cls(
             content=query.strip(),
             answer_length=answer_length,
-            clue_num=clue_num,
-            across_down=across_down,
             expansion_type=expansion_type,
         )
 
@@ -50,8 +44,6 @@ class CrosswordQuery(NoSQLBaseDocument["CrosswordQuery"]):
             id=self.id,
             content=new_content,
             answer_length=self.answer_length,
-            clue_num=self.clue_num,
-            across_down=self.across_down,
             expansion_type=self.expansion_type,
             metadata=self.metadata,
         )

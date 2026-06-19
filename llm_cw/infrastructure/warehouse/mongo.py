@@ -139,7 +139,7 @@ class NoSQLBaseDocument(BaseModel, ABC, Generic[T]):
         cls,
         embedding: list[float],
         limit: int = 5,
-    ) -> list[dict]:
+    ) -> list:
 
         collection = _database[cls.get_collection_name()]
 
@@ -154,16 +154,10 @@ class NoSQLBaseDocument(BaseModel, ABC, Generic[T]):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "cleaned_clue_text": 1,
-                    "cleaned_answer_text": 1,
-                    "clue_embedding": 1,
-                    "score": {
-                        "$meta": "vectorSearchScore"
-                    },
+                "$addFields": {
+                    "score": {"$meta": "vectorSearchScore"}
                 }
-            },
+            }
         ]
 
         return list(collection.aggregate(pipeline))
