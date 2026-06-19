@@ -55,13 +55,7 @@ class ContextRetriever:
             deduped.append(doc)
 
         n_k_documents = deduped
-        # unique_docs = {}
-
-        # for doc in n_k_documents:
-        #     unique_docs[str(doc["_id"])] = doc
-
-        # n_k_documents = list(unique_docs.values())
-
+       
         if len(n_k_documents) > 0:
             k_documents = self.rerank(
                 query=query_model,
