@@ -10,3 +10,4 @@ wheels/
 .venv
 
 .env
+llm_cw/eval/eval_dataset.json
