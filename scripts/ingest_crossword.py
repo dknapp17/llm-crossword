@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from llm_cw.domain.documents import CrosswordDocument
 from llm_cw.ingestion.ingestion import ingest_crossword
 
+import time
+
 
 def parse_date(arg: str) -> datetime:
     return datetime.strptime(arg, "%Y-%m-%d")
@@ -43,6 +45,8 @@ def main():
 
                 print(f"Inserted {len(docs)} documents")
                 total_docs += len(docs)
+                time.sleep(5)
+                
 
             except Exception as e:
                 print(f"\n❌ Failed ingestion for {puzzle_date.date()}")
@@ -51,7 +55,7 @@ def main():
                 continue
 
         print(f"\nDone. Total inserted: {total_docs}")
-
+        
     except Exception as e:
         print(f"Failed ingestion run: {e}")
         raise
