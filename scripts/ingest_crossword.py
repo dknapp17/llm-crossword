@@ -1,11 +1,10 @@
 import sys
+import time
 import traceback
 from datetime import datetime, timedelta
 
 from llm_cw.domain.documents import CrosswordDocument
 from llm_cw.ingestion.ingestion import ingest_crossword
-
-import time
 
 
 def parse_date(arg: str) -> datetime:

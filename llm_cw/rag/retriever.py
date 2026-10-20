@@ -18,31 +18,38 @@ class ContextRetriever:
         query: str,
         k: int = 3,
         expand_to_n_queries: int = 3,
+        expand=False
     ) -> list[VectorSearchResult]:
 
         query_model = CrosswordQuery.from_str(query)
 
-        n_generated_queries = self._query_expander.generate(
-            query_model,
-            expand_to_n=expand_to_n_queries,
-        )
+        # TODO: make query expansion optional
+        if expand:
+            n_generated_queries = self._query_expander.generate(
+                query_model,
+                expand_to_n=expand_to_n_queries,
+            )
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
 
-            search_tasks = [
-                executor.submit(
-                    self._search,
-                    _query_model,
-                    k,
-                )
-                for _query_model in n_generated_queries
-            ]
+                search_tasks = [
+                    executor.submit(
+                        self._search,
+                        _query_model,
+                        k,
+                    )
+                    for _query_model in n_generated_queries
+                ]
 
-            n_k_documents = []
+                n_k_documents = []
 
-            for task in concurrent.futures.as_completed(search_tasks):
-                n_k_documents.extend(task.result())
-
+                for task in concurrent.futures.as_completed(search_tasks):
+                    n_k_documents.extend(task.result())
+        else:
+            n_k_documents = self._search(
+                query=query_model,
+                k=k,
+            )
         # dedupe by mongo _id
         #TODO: put this in a function
         seen = set()
@@ -72,15 +79,13 @@ class ContextRetriever:
         query: CrosswordQuery,
         k: int = 3
     ) -> list[VectorSearchResult]:
-        assert k >= 3, "k should be >= 3"
-
+        # assert k >= 3, "k should be >= 3"
         embedded_query: EmbeddedCrosswordQuery = embed_query(query)
 
         raw_results = EmbeddedCrosswordDocument.vector_search(
             embedding=embedded_query.embedding,
             limit=k
         )
-
         results: list[VectorSearchResult] = [
             VectorSearchResult.from_mongo(doc)
             for doc in raw_results

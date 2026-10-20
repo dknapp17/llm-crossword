@@ -41,7 +41,7 @@ class QueryExpansion(RAGStep):
 
         response = self.generator(
             prompt,
-            max_new_tokens=200,
+            max_new_tokens=64,
             do_sample=False,
         )
 
