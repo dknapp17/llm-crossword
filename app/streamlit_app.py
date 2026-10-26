@@ -44,6 +44,16 @@ def parse_constraints(text):
 
 constraints = parse_constraints(constraint_input)
 
+# --- upload .puz file ---
+uploaded_file = st.file_uploader("Upload .puz file", type=['puz'])
+
+if uploaded_file is not None:
+    file_details = {
+        'file_name': uploaded_file.name,
+        'file_size': uploaded_file.size,
+        'mime_type': uploaded_file.type
+    }
+    st.write("File uploaded successfully:")
 
 # --- run solver ---
 if st.button("Solve"):
@@ -62,3 +72,4 @@ if st.button("Solve"):
     else:
         for r in results:
             st.write(f"• {r.text}")
+
