@@ -1,6 +1,6 @@
 import streamlit as st
 
-from llm_cw.domain.crossword import CrosswordClue
+from llm_cw.domain.crossword import SolverClueInput
 from llm_cw.retrieval.wordlist import WordList
 from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
 
@@ -47,10 +47,9 @@ constraints = parse_constraints(constraint_input)
 
 # --- run solver ---
 if st.button("Solve"):
-    clue = CrosswordClue(
+    clue = SolverClueInput(
         text=clue_text,
         length=int(length),
-        weekday_num=0,
         positional_constraints=constraints
     )
 
