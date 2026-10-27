@@ -1,5 +1,6 @@
 import streamlit as st
 
+import llm_cw.utils.puz_utils as puz_utils
 from llm_cw.domain.crossword import SolverClueInput
 from llm_cw.retrieval.wordlist import WordList
 from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
@@ -48,12 +49,8 @@ constraints = parse_constraints(constraint_input)
 uploaded_file = st.file_uploader("Upload .puz file", type=['puz'])
 
 if uploaded_file is not None:
-    file_details = {
-        'file_name': uploaded_file.name,
-        'file_size': uploaded_file.size,
-        'mime_type': uploaded_file.type
-    }
-    st.write("File uploaded successfully:")
+    puzzle = puz_utils.load_puz_file(uploaded_file.getvalue())
+    st.write(f"Title: {puzzle.title}")
 
 # --- run solver ---
 if st.button("Solve"):
