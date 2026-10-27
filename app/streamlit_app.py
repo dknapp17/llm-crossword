@@ -1,6 +1,7 @@
 import streamlit as st
 
-from llm_cw.domain.crossword import CrosswordClue
+import llm_cw.utils.puz_utils as puz_utils
+from llm_cw.domain.crossword import SolverClueInput
 from llm_cw.retrieval.wordlist import WordList
 from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
 
@@ -44,13 +45,18 @@ def parse_constraints(text):
 
 constraints = parse_constraints(constraint_input)
 
+# --- upload .puz file ---
+uploaded_file = st.file_uploader("Upload .puz file", type=['puz'])
+
+if uploaded_file is not None:
+    puzzle = puz_utils.load_puz_file(uploaded_file.getvalue())
+    st.write(f"Title: {puzzle.title}")
 
 # --- run solver ---
 if st.button("Solve"):
-    clue = CrosswordClue(
+    clue = SolverClueInput(
         text=clue_text,
         length=int(length),
-        weekday_num=0,
         positional_constraints=constraints
     )
 
@@ -63,3 +69,4 @@ if st.button("Solve"):
     else:
         for r in results:
             st.write(f"• {r.text}")
+

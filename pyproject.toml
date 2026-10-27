@@ -11,6 +11,7 @@ dependencies = [
     "langchain-ollama>=0.3.10",
     "langchain-openai>=0.3.35",
     "loguru>=0.7.3",
+    "puzpy>=0.7.0",
     "pydantic-settings>=2.11.0",
     "pymongo>=4.17.0",
     "ruff>=0.15.12",
