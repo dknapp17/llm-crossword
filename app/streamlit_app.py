@@ -50,7 +50,7 @@ uploaded_file = st.file_uploader("Upload .puz file", type=['puz'])
 
 if uploaded_file is not None:
     puzzle = puz_utils.load_puz_file(uploaded_file.getvalue())
-    st.write(f"Title: {puzzle.title}")
+    puz_utils.display_puzzle(uploaded_file)
 
 # --- run solver ---
 if st.button("Solve"):
