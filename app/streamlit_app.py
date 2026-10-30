@@ -52,8 +52,15 @@ if uploaded_file is not None:
     puzzle = puz_utils.load_puz_file(uploaded_file.getvalue())
     puz_utils.display_puzzle(uploaded_file)
 
-# --- run solver ---
-if st.button("Solve"):
+# --- run solver for an entire puzzle ---
+model = st.selectbox("Model", ["Default"], index=0)
+retrieval = st.selectbox("Retrieval", ["RAG"], index=0)
+
+if st.button("Solve Puzzle"):
+    st.write(f"Solving with model={model}, retrieval={retrieval}")
+
+# --- run solver for a single clue ---
+if st.button("Solve Clue"):
     clue = SolverClueInput(
         text=clue_text,
         length=int(length),
