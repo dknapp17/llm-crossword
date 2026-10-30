@@ -78,6 +78,7 @@ class ExolveEmbedder {
 
     try {
       const xlv = new Exolve(exolveSpecs, 'xlv-embedder', null, notInIframe);
+      window.xlv = xlv;
       if (this.titlePrefix) {
         document.title = this.titlePrefix + (xlv.title || 'Untitled');
       }
