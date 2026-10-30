@@ -1,11 +1,12 @@
 
+import atexit
 import hashlib
 from pathlib import Path
 
 import puz
 import streamlit as st
 
-import atexit
+from llm_cw.utils.exolve_ui_bridge import exolve_component
 
 
 def load_puz_file(file_bytes: bytes) -> puz.Puzzle:
@@ -29,14 +30,14 @@ def display_puzzle(uploaded_file) -> None:
             old_puzzle.unlink()
 
     (exolve_dir / puzzle_name).write_bytes(puzzle_bytes)
-    (exolve_dir / puzzle_name).write_bytes(puzzle_bytes)
 
     # Load the interactive Exolve player.
-    player_url = (
-        f"/app/static/exolve/exolve-embedder.html"
-        f"?crossword={puzzle_name}"
+
+    result = exolve_component(
+        crossword=puzzle_name,
+        key="exolve",
     )
-    st.iframe(player_url, height=800)
+    return result
 
 def cleanup_puz_files() -> None:
     exolve_dir = (

@@ -30,6 +30,7 @@ constraint_input = st.text_input(
     ""
 )
 
+
 # --- parse constraints ---
 def parse_constraints(text):
     if not text.strip():
@@ -40,31 +41,44 @@ def parse_constraints(text):
         if ":" in part:
             idx, letter = part.split(":")
             constraints[int(idx.strip())] = letter.strip()
+
     return constraints
 
 
 constraints = parse_constraints(constraint_input)
 
+
 # --- upload .puz file ---
-uploaded_file = st.file_uploader("Upload .puz file", type=['puz'])
+uploaded_file = st.file_uploader("Upload .puz file", type=["puz"])
 
 if uploaded_file is not None:
-    puzzle = puz_utils.load_puz_file(uploaded_file.getvalue())
-    puz_utils.display_puzzle(uploaded_file)
+    selected_clue = puz_utils.display_puzzle(uploaded_file)
 
-# --- run solver for an entire puzzle ---
+    st.subheader("Selected Exolve clue")
+    if selected_clue:
+        st.write(f"**Clue:** {selected_clue.get('text')}")
+        st.write(f"**Length:** {selected_clue.get('answer_length')}")
+        st.write(f"**Index:** {selected_clue.get('index')}")
+    else:
+        st.write("Select a clue in the crossword.")
+
+
+# --- solver configuration ---
 model = st.selectbox("Model", ["Default"], index=0)
 retrieval = st.selectbox("Retrieval", ["RAG"], index=0)
 
+
+# --- run solver for an entire puzzle ---
 if st.button("Solve Puzzle"):
     st.write(f"Solving with model={model}, retrieval={retrieval}")
+
 
 # --- run solver for a single clue ---
 if st.button("Solve Clue"):
     clue = SolverClueInput(
         text=clue_text,
         length=int(length),
-        positional_constraints=constraints
+        positional_constraints=constraints,
     )
 
     results = solver.solve(clue)
@@ -76,4 +90,3 @@ if st.button("Solve Clue"):
     else:
         for r in results:
             st.write(f"• {r.text}")
-
