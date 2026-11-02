@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import List
 
-from llm_cw.domain.crossword import CrosswordAnswer, CrosswordClue
+from llm_cw.domain.crossword import ExolveAnswer, ExolveClue, SolverConfig
 
 
 class BaseSolver(ABC):
 
     @abstractmethod
-    def solve(self, clue: CrosswordClue) -> List[CrosswordAnswer]:
+    def solve(
+        self,
+        clue: ExolveClue,
+        config: SolverConfig,
+
+    ) -> ExolveAnswer:
         pass
 
 
