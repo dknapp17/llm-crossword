@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="module">
+        import { Streamlit } from
+            "https://cdn.jsdelivr.net/npm/streamlit-component-lib@2.0.0/dist/index.js";
+
+        const exolveFrame = document.getElementById("exolve-frame");
+
+        function onRender(event) {
+            const { crossword } = event.detail.args;
+
+            exolveFrame.src =
+                `/app/static/exolve/exolve-embedder.html?crossword=${encodeURIComponent(crossword)}`;
+
+            Streamlit.setFrameHeight(820);
+        }
+
+        Streamlit.events.addEventListener(
+            Streamlit.RENDER_EVENT,
+            onRender
+        );
+
+        Streamlit.setComponentReady();
+    </script>
+</head>
+<body>
+    <iframe
+        id="exolve-frame"
+        width="100%"
+        height="800"
+        style="border: none;"
+    ></iframe>
+</body>
+</html>

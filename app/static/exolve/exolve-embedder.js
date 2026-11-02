@@ -79,6 +79,7 @@ class ExolveEmbedder {
     try {
       const xlv = new Exolve(exolveSpecs, 'xlv-embedder', null, notInIframe);
       window.xlv = xlv;
+      window.sendClueToParent = this.sendClueToParent.bind(this);
       if (this.titlePrefix) {
         document.title = this.titlePrefix + (xlv.title || 'Untitled');
       }
@@ -134,5 +135,23 @@ class ExolveEmbedder {
   }
   showMessage(msg) {
     this.embedder.innerHTML = msg;
+  }
+
+  sendClueToParent() {
+    const clue = window.xlv.clues[window.xlv.currClueIndex];
+
+    if (!clue) {
+      return;
+    }
+
+    window.parent.postMessage(
+      {
+        type: "EXOLVE_CLUE",
+        index: window.xlv.currClueIndex,
+        text: clue.clue,
+        answer_length: clue.cells.length,
+      },
+      window.location.origin
+    );
   }
 }
