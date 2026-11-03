@@ -2,7 +2,7 @@ from llm_cw.domain.crossword import ExolveAnswer, ExolveClue, SolverConfig
 from llm_cw.solvers.solver import BaseSolver
 
 
-class AlgorithmicSolver(BaseSolver):
+class ToySolver(BaseSolver):
     def solve(
         self,
         clue: ExolveClue,

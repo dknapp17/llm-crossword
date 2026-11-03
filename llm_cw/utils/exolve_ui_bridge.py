@@ -17,11 +17,6 @@ export default function(component) {
     const { parentElement, data, setStateValue } = component;
     const frame = parentElement.querySelector("#exolve-frame");
 
-    const crossword = data.crossword;
-
-    frame.src =
-        `/app/static/exolve/exolve-embedder.html?crossword=${encodeURIComponent(crossword)}&v=3`;
-
     function handleMessage(event) {
         if (event.origin !== window.location.origin) {
             return;
@@ -31,14 +26,30 @@ export default function(component) {
             return;
         }
 
-        if (event.data?.type !== "EXOLVE_CLUE") {
-            return;
+        const message = event.data;
+
+        if (message?.type === "EXOLVE_LOADED") {
+            setStateValue("event", {
+                type: "crossword_loaded",
+            });
         }
 
-        setStateValue("clue", event.data);
+        if (message?.type === "EXOLVE_CLUE") {
+            setStateValue("event", {
+                type: "clue_selected",
+                index: message.index,
+                clue_text: message.text,
+                answer_length: message.answer_length,
+            });
+        }
     }
 
     window.addEventListener("message", handleMessage);
+
+    const crossword = data.crossword;
+
+    frame.src =
+        `/app/static/exolve/exolve-embedder.html?crossword=${encodeURIComponent(crossword)}&v=3`;
 
     return () => {
         window.removeEventListener("message", handleMessage);
@@ -57,12 +68,11 @@ _component = st.components.v2.component(
 def exolve_component(
     crossword: str,
     key: str | None = None,
-) -> dict | None:
+) -> dict:
     result = _component(
         data={"crossword": crossword},
-        default={"clue": None},
+        default={"event": None},
         key=key,
-        on_clue_change=lambda: None,
     )
 
-    return result.clue
+    return result.event

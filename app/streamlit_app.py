@@ -4,6 +4,7 @@ import llm_cw.utils.puz_utils as puz_utils
 from llm_cw.domain.crossword import SolverClueInput
 from llm_cw.retrieval.wordlist import WordList
 from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
+from llm_cw.utils.exolve_ui_bridge import exolve_component
 
 
 # --- load solver once ---
@@ -52,15 +53,21 @@ constraints = parse_constraints(constraint_input)
 uploaded_file = st.file_uploader("Upload .puz file", type=["puz"])
 
 if uploaded_file is not None:
-    selected_clue = puz_utils.display_puzzle(uploaded_file)
+    puzzle_name = puz_utils.display_puzzle(uploaded_file)
 
-    st.subheader("Selected Exolve clue")
-    if selected_clue:
-        st.write(f"**Clue:** {selected_clue.get('text')}")
-        st.write(f"**Length:** {selected_clue.get('answer_length')}")
-        st.write(f"**Index:** {selected_clue.get('index')}")
-    else:
-        st.write("Select a clue in the crossword.")
+    event = exolve_component(
+        crossword=puzzle_name,
+        key="exolve",
+    )
+
+    st.subheader("Component event")
+    st.write(event)
+
+    if event and event["type"] == "clue_selected":
+        st.subheader("Selected Exolve clue")
+        st.write(f"**Clue:** {event['clue_text']}")
+        st.write(f"**Length:** {event['answer_length']}")
+        st.write(f"**Index:** {event['index']}")
 
 
 # --- solver configuration ---

@@ -78,12 +78,33 @@ class ExolveEmbedder {
 
     try {
       const xlv = new Exolve(exolveSpecs, 'xlv-embedder', null, notInIframe);
+      window.parent.postMessage(
+          {
+              type: "EXOLVE_LOADED",
+          },
+          window.location.origin
+      );
       window.xlv = xlv;
       window.sendClueToParent = this.sendClueToParent.bind(this);
       if (this.titlePrefix) {
         document.title = this.titlePrefix + (xlv.title || 'Untitled');
       }
       window.writeAnswer = this.writeAnswer.bind(this);
+      window.addEventListener('message', (event) => {
+        if (event.source !== window.parent) {
+          return;
+        }
+
+        if (event.origin !== window.location.origin) {
+          return;
+        }
+
+        if (event.data?.type !== 'EXOLVE_WRITE_ANSWER') {
+          return;
+        }
+
+        this.writeAnswer(event.data.index, event.data.answer);
+      });
     } catch (err) {
       this.showMessage(err);
       return false;
