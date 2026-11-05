@@ -52,7 +52,23 @@ Usage:
 <script src="exolve-m.js?v=3"></script>
 <script src="exolve-from-ipuz.js"></script>
 <script src="exolve-from-puz.js"></script>
-<script src="exolve-embedder.js"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const version = params.get("v");
+
+    const script = document.createElement("script");
+    script.src = `exolve-embedder.js?v=${version}`;
+
+    script.onload = () => {
+        try {
+            const exolveEmbedder = new ExolveEmbedder();
+        } catch (err) {
+            document.getElementById("xlv-embedder").innerHTML = err;
+        }
+    };
+
+    document.head.appendChild(script);
+</script>
 <!--
   You can get rid of depending on my site for serving the above files by serving
   your own copies of them. Download them all into the same dir as this file, from:
@@ -71,7 +87,7 @@ Usage:
 <div id="xlv-embedder">
 </div>
 
-<script>
+<!-- <script>
 
 try {
   const exolveEmbedder = new ExolveEmbedder();
@@ -79,6 +95,6 @@ try {
   document.getElementById('xlv-embedder').innerHTML = err;
 }
 
-</script>
+</script> -->
 </body>
 </html>
