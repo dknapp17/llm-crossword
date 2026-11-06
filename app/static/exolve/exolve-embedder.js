@@ -79,6 +79,15 @@ class ExolveEmbedder {
     try {
       const xlv = new Exolve(exolveSpecs, 'xlv-embedder', null, notInIframe);
       window.xlv = xlv;
+      xlv.frame.addEventListener('exolve', (event) => {
+          window.parent.postMessage(
+              {
+                  type: "PUZZLE_COMPLETE",
+                  ...event.detail
+              },
+              window.location.origin
+          );
+      });
       console.log("Exolve initialized");
 
       window.parent.postMessage(

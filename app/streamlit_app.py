@@ -1,10 +1,10 @@
 import streamlit as st
 
-from llm_cw.utils.exolve_ui_bridge import exolve_component
 import llm_cw.utils.puz_utils as puz_utils
 from llm_cw.domain.crossword import SolverClueInput
 from llm_cw.retrieval.wordlist import WordList
 from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
+from llm_cw.utils.exolve_ui_bridge import exolve_component
 
 
 # --- load solver once ---

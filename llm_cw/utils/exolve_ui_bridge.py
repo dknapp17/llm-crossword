@@ -1,8 +1,8 @@
 
+import hashlib
 from pathlib import Path
 
 import streamlit as st
-import hashlib
 
 HTML = """
 <iframe
@@ -101,7 +101,5 @@ def exolve_component(
     )
 
     st.write("Component result:", result)
-    st.write("JavaScript version:", version)
-    st.write("Component result:", repr(result))
 
     return result
