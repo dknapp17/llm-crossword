@@ -3,15 +3,60 @@ from datetime import datetime
 from enum import Enum
 
 
+# utility objects
 class AcrossDown(str, Enum):
     ACROSS = "across"
     DOWN = "down"
 
+
+# crossword objects
 @dataclass
 class CrosswordClue:
     text: str
     across_down: AcrossDown
     clue_num: int
+
+@dataclass
+class ExolveClue:
+    index: str
+    clue_text: str
+    answer_length: int
+    positional_constraints: dict[int, str]  # ex: {0: C} for C _ _
+
+@dataclass
+class ExolveAnswer:
+    answer_text: str
+    answer_length: int
+    positional_text: dict[int, str]  # ex: {0: C} for C _ _
+
+    @classmethod
+    def from_str(cls, text: str) -> "ExolveAnswer":
+        text = text.upper()
+
+        return cls(
+            answer_text=text,
+            answer_length=len(text),
+            positional_text={
+                i: letter for i, letter in enumerate(text)
+            },
+        )
+
+    @classmethod
+    def from_dict(cls, positional_text: dict[int, str]) -> "ExolveAnswer":
+        positional_text = {
+            int(i): letter.upper()
+            for i, letter in positional_text.items()
+        }
+
+        answer_text = "".join(
+            positional_text[i] for i in sorted(positional_text)
+        )
+
+        return cls(
+            answer_text=answer_text,
+            answer_length=len(answer_text),
+            positional_text=positional_text,
+        )
 
 @dataclass
 class CrosswordAnswer:
@@ -30,18 +75,27 @@ class CrosswordPuzzleData:
     puzzle_dow: int
     puzzle_url: str
 
+# Solver objects
+@dataclass
+class SolverConfig:
+    model: str  # ex: "Default"
+    retrieval: str  # ex: "RAG"
+
 @dataclass
 class SolverClueInput:
     text: str  # ex: Feline
     length: int  # ex: 3
-    positional_constraints: dict[int, str]  # ex: {1: C} for C _ _
+    positional_constraints: dict[int, str]  # ex: {0: C} for C _ _
 
 
 @dataclass
 class SolverAnswer:
     text: str  # ex: DEADHEAT
     length: int
-    positional_text: dict[str, str]  # ex: {1: DH, 2: E, 3: A, 4: DT}
+    positional_text: dict[int, str]  # ex: {0: D, 1: E, 2: A, 3: D}
+
+
+# Grid objects
 
 @dataclass
 class CrosswordGridSquare:
