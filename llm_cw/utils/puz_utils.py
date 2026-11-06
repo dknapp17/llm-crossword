@@ -35,7 +35,6 @@ def display_puzzle(uploaded_file) -> None:
 
     result = exolve_component(
         crossword=puzzle_name,
-        key="exolve",
     )
     return result
 

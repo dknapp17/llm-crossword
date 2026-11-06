@@ -1,5 +1,8 @@
 
+from pathlib import Path
+
 import streamlit as st
+import hashlib
 
 HTML = """
 <iframe
@@ -15,14 +18,36 @@ HTML = """
 JS = """
 export default function(component) {
     const { parentElement, data, setStateValue } = component;
+    console.log("Component data:", data);
+    const command = data.command;
     const frame = parentElement.querySelector("#exolve-frame");
 
     const crossword = data.crossword;
-
     frame.src =
-        `/app/static/exolve/exolve-embedder.html?crossword=${encodeURIComponent(crossword)}&v=3`;
+        `/app/static/exolve/exolve-embedder.html?crossword=${encodeURIComponent(crossword)}&v=${data.version}`;
+    console.log("Assigned iframe URL:", frame.src);
+    if (command) {
+        frame.contentWindow.postMessage(
+            command,
+            window.location.origin
+        );
+    }
 
+    
+
+    
+    
     function handleMessage(event) {
+        console.log("Component received message:", event.data);
+        console.log("Full message data:", event.data);
+        if (event.data?.type === "EXOLVE_LOADED") {
+            console.log("Exolve is ready");
+
+            frame.contentWindow.postMessage(
+                command,
+                window.location.origin
+            );
+        }
         if (event.origin !== window.location.origin) {
             return;
         }
@@ -31,11 +56,12 @@ export default function(component) {
             return;
         }
 
-        if (event.data?.type !== "EXOLVE_CLUE") {
+        if (event.data?.type !== "TEST_RESPONSE") {
             return;
         }
 
         setStateValue("clue", event.data);
+        console.log("Sent TEST_RESPONSE to Streamlit:", event.data);
     }
 
     window.addEventListener("message", handleMessage);
@@ -56,13 +82,26 @@ _component = st.components.v2.component(
 
 def exolve_component(
     crossword: str,
-    key: str | None = None,
 ) -> dict | None:
-    result = _component(
-        data={"crossword": crossword},
-        default={"clue": None},
-        key=key,
-        on_clue_change=lambda: None,
+    exolve_js = (
+        Path(__file__).resolve().parents[2]
+        / "app"
+        / "static"
+        / "exolve"
+        / "exolve-embedder.js"
     )
 
-    return result.clue
+    version = hashlib.md5(exolve_js.read_bytes()).hexdigest()
+    result = _component(
+        data={
+            "crossword": crossword,
+            "version": version,
+            "command": {"type": "TEST"},
+        },
+    )
+
+    st.write("Component result:", result)
+    st.write("JavaScript version:", version)
+    st.write("Component result:", repr(result))
+
+    return result

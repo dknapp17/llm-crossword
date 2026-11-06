@@ -79,6 +79,30 @@ class ExolveEmbedder {
     try {
       const xlv = new Exolve(exolveSpecs, 'xlv-embedder', null, notInIframe);
       window.xlv = xlv;
+      console.log("Exolve initialized");
+
+      window.parent.postMessage(
+          { type: "EXOLVE_LOADED" },
+          window.location.origin
+      );
+      window.addEventListener('message', (event) => {
+        console.log("Exolve received a message");
+        console.log("Message data:", event.data);
+        if (event.source !== window.parent) {
+            return;
+        }
+
+        if (event.origin !== window.location.origin) {
+            return;
+        }
+
+        console.log("Received message from Streamlit:", event.data);
+        console.log("Sending TEST_RESPONSE to parent");
+        window.parent.postMessage(
+            { type: "TEST_RESPONSE", message: "Hello from Exolve" },
+            window.location.origin
+        );
+      });
       window.sendClueToParent = this.sendClueToParent.bind(this);
       if (this.titlePrefix) {
         document.title = this.titlePrefix + (xlv.title || 'Untitled');

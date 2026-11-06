@@ -1,5 +1,6 @@
 import streamlit as st
 
+from llm_cw.utils.exolve_ui_bridge import exolve_component
 import llm_cw.utils.puz_utils as puz_utils
 from llm_cw.domain.crossword import SolverClueInput
 from llm_cw.retrieval.wordlist import WordList
@@ -52,15 +53,9 @@ constraints = parse_constraints(constraint_input)
 uploaded_file = st.file_uploader("Upload .puz file", type=["puz"])
 
 if uploaded_file is not None:
-    selected_clue = puz_utils.display_puzzle(uploaded_file)
+    exolve_component = puz_utils.display_puzzle(uploaded_file)
+    # st.write("Component result:", exolve_component)
 
-    st.subheader("Selected Exolve clue")
-    if selected_clue:
-        st.write(f"**Clue:** {selected_clue.get('text')}")
-        st.write(f"**Length:** {selected_clue.get('answer_length')}")
-        st.write(f"**Index:** {selected_clue.get('index')}")
-    else:
-        st.write("Select a clue in the crossword.")
 
 
 # --- solver configuration ---
