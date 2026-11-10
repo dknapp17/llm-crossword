@@ -1,10 +1,11 @@
+from pathlib import Path
+
 import streamlit as st
 
-import llm_cw.utils.puz_utils as puz_utils
 from llm_cw.domain.crossword import SolverClueInput
 from llm_cw.retrieval.wordlist import WordList
 from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
-from llm_cw.utils.exolve_ui_bridge import exolve_component
+from llm_cw.utils.exolve_component import ExolveComponent
 
 
 # --- load solver once ---
@@ -53,10 +54,8 @@ constraints = parse_constraints(constraint_input)
 uploaded_file = st.file_uploader("Upload .puz file", type=["puz"])
 
 if uploaded_file is not None:
-    exolve_component = puz_utils.display_puzzle(uploaded_file)
-    # st.write("Component result:", exolve_component)
-
-
+    exolve = ExolveComponent(uploaded_file)
+    exolve.display()
 
 # --- solver configuration ---
 model = st.selectbox("Model", ["Default"], index=0)
@@ -64,9 +63,9 @@ retrieval = st.selectbox("Retrieval", ["RAG"], index=0)
 
 
 # --- run solver for an entire puzzle ---
-if st.button("Solve Puzzle"):
-    st.write(f"Solving with model={model}, retrieval={retrieval}")
 
+if st.button("Solve Puzzle", disabled=uploaded_file is None):
+    Path("solve_requested.txt").write_text("solve")
 
 # --- run solver for a single clue ---
 if st.button("Solve Clue"):
