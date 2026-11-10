@@ -5,6 +5,9 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
+from llm_cw.domain.crossword import AcrossDown
+from llm_cw.utils.exolve_utils import ExolveController
+
 signal_file = Path("solve_requested.txt")
 signal_file.unlink(missing_ok=True)
 
@@ -25,6 +28,7 @@ try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
+        controller = ExolveController(page)
 
         page.goto("http://localhost:8501", timeout=120000)
 
@@ -41,14 +45,9 @@ try:
     
         frame = page.frame_locator("#exolve-frame")
     
-        clue = frame.locator(
-            '#xlv2-across tr:has(> td.xlv-clue-label:text-is("32"))'
-        )
+        controller.select_clue(AcrossDown.ACROSS, 32)
     
-        clue.click()
-    
-        grid_input = frame.locator("#xlv2-grid-input")
-        grid_input.press_sequentially("CEROS")
+        controller.enter_answer("CEROS")
 
         page.pause()
 
