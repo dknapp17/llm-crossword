@@ -18,6 +18,9 @@ app = subprocess.Popen(
     ]
 )
 
+exolve_dir = Path("app/static/exolve")
+existing_puzzles = set(exolve_dir.glob("*.puz"))
+
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
@@ -54,3 +57,10 @@ try:
 finally:
     app.terminate()
     app.wait()
+    # Remove puzzles uploaded during this session
+    new_puzzles = set(exolve_dir.glob("*.puz")) - existing_puzzles
+
+    for puzzle in new_puzzles:
+        puzzle.unlink(missing_ok=True)
+
+    signal_file.unlink(missing_ok=True)

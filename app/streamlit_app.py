@@ -56,17 +56,6 @@ uploaded_file = st.file_uploader("Upload .puz file", type=["puz"])
 if uploaded_file is not None:
     exolve = ExolveComponent(uploaded_file)
     exolve.display()
-    
-    # st.write(exolve.get_current_clue())
-    # if st.button("Select A22"):
-    #     exolve.select_clue("A22")
-
-    # if st.button("Enter CAT"):
-    #     exolve.enter_answer("CAT")
-
-    
-
-
 
 # --- solver configuration ---
 model = st.selectbox("Model", ["Default"], index=0)

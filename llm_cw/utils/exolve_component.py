@@ -48,20 +48,3 @@ class ExolveComponent:
             },
         ) or {}
         self.command = None
-
-    def get_current_clue(self):
-        return self.state.get("clue")
-
-    def select_clue(self, clue_index: str):
-        st.session_state["exolve_command"] = {
-            "id": str(uuid.uuid4()),
-            "type": "SELECT_CLUE",
-            "index": clue_index,
-        }
-
-    def enter_answer(self, answer: str):
-        st.session_state["exolve_command"] = {
-            "id": str(uuid.uuid4()),
-            "type": "ENTER_ANSWER",
-            "answer": answer,
-        }
