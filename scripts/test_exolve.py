@@ -6,21 +6,25 @@ with sync_playwright() as p:
 
     page.goto("http://localhost:8501")
 
-    page.wait_for_selector("#exolve-frame")
+    page.wait_for_selector("#exolve-frame", timeout=0)
+
+    print("Waiting for Solve Puzzle...")
+
+    page.wait_for_selector("#solve-requested", timeout=0)
+
+    print("Solve requested!")
 
     frame = page.frame_locator("#exolve-frame")
+
     clue = frame.locator(
-        "#xlv2-across tr"
-    ).filter(
-        has=frame.locator(".xlv-clue-label").get_by_text(
-            "32", exact=True
-        )
+        '#xlv2-across tr:has(> td.xlv-clue-label:text-is("32"))'
     )
 
     clue.click()
 
-    print("Exolve iframe found!")
+    grid_input = frame.locator("#xlv2-grid-input")
+    grid_input.press_sequentially("CEROS")
 
     page.pause()
 
-    # browser.close()
+    browser.close()
