@@ -23,6 +23,7 @@ class ExolveEmbedder {
     this.embedder = document.getElementById('xlv-embedder');
     this.crossword = '';
     this.exolveOverrides = '';
+    window.exolveEmbedder = this;
 
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -107,15 +108,21 @@ class ExolveEmbedder {
 
         console.log("Received message from Streamlit:", event.data);
         console.log("Sending TEST_RESPONSE to parent");
-        window.parent.postMessage(
-            { type: "TEST_RESPONSE", message: "Hello from Exolve" },
-            window.location.origin
-        );
-      });
+        if (event.data?.type === "SELECT_CLUE") {
+            const clue = window.xlv.clues[event.data.index];
+
+            if (clue) {
+                window.xlv.gnavToInner(clue.cells[0], clue.dir);
+            }
+        }
+        if (event.data?.type === "ENTER_ANSWER") {
+            this.enterAnswer(event.data.answer);
+        }
       window.sendClueToParent = this.sendClueToParent.bind(this);
       if (this.titlePrefix) {
         document.title = this.titlePrefix + (xlv.title || 'Untitled');
       }
+            });
     } catch (err) {
       this.showMessage(err);
       return false;
@@ -187,4 +194,13 @@ class ExolveEmbedder {
       window.location.origin
     );
   }
+
+  enterAnswer(answer) {
+    for (const letter of answer) {
+        window.xlv.gridInput.value = letter;
+        window.xlv.gridInput.dispatchEvent(
+            new Event("input", { bubbles: true })
+        );
+    }
+}
 }

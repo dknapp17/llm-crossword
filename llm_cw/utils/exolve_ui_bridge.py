@@ -20,18 +20,25 @@ export default function(component) {
     const { parentElement, data, setStateValue } = component;
     console.log("Component data:", data);
     const command = data.command;
+    console.log("Command received by component:", command);
     const frame = parentElement.querySelector("#exolve-frame");
 
-    const crossword = data.crossword;
-    frame.src =
-        `/app/static/exolve/exolve-embedder.html?crossword=${encodeURIComponent(crossword)}&v=${data.version}`;
-    console.log("Assigned iframe URL:", frame.src);
     if (command) {
         frame.contentWindow.postMessage(
             command,
             window.location.origin
         );
     }
+
+    const crossword = data.crossword;
+    const crosswordUrl =
+        `/app/static/exolve/exolve-embedder.html?crossword=${encodeURIComponent(crossword)}&v=${data.version}`;
+
+    if (frame.src !== new URL(crosswordUrl, window.location.origin).href) {
+        frame.src = crosswordUrl;
+        console.log("Assigned iframe URL:", frame.src);
+    }
+    
 
     
 
@@ -40,13 +47,9 @@ export default function(component) {
     function handleMessage(event) {
         console.log("Component received message:", event.data);
         console.log("Full message data:", event.data);
-        if (event.data?.type === "EXOLVE_LOADED") {
+        if (event.data?.type === "EXOLVE_LOADED" && command) {
             console.log("Exolve is ready");
-
-            frame.contentWindow.postMessage(
-                command,
-                window.location.origin
-            );
+            console.log("Sending command to iframe:", command);
         }
         if (event.origin !== window.location.origin) {
             return;
@@ -56,7 +59,7 @@ export default function(component) {
             return;
         }
 
-        if (event.data?.type !== "TEST_RESPONSE") {
+        if (event.data?.type !== "EXOLVE_CLUE") {
             return;
         }
 

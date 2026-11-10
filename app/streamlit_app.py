@@ -4,6 +4,7 @@ import llm_cw.utils.puz_utils as puz_utils
 from llm_cw.domain.crossword import SolverClueInput
 from llm_cw.retrieval.wordlist import WordList
 from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
+from llm_cw.utils.exolve_component import ExolveComponent
 from llm_cw.utils.exolve_ui_bridge import exolve_component
 
 
@@ -53,8 +54,17 @@ constraints = parse_constraints(constraint_input)
 uploaded_file = st.file_uploader("Upload .puz file", type=["puz"])
 
 if uploaded_file is not None:
-    exolve_component = puz_utils.display_puzzle(uploaded_file)
-    # st.write("Component result:", exolve_component)
+    exolve = ExolveComponent(uploaded_file)
+    exolve.display()
+    
+    # st.write(exolve.get_current_clue())
+    # if st.button("Select A22"):
+    #     exolve.select_clue("A22")
+
+    # if st.button("Enter CAT"):
+    #     exolve.enter_answer("CAT")
+
+    
 
 
 
