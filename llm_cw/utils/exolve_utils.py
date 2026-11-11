@@ -51,14 +51,7 @@ class ExolveController:
     def select_next_incomplete_clue(self) -> bool:
         while True:
             self.select_next_clue()
-
-            clue = self.read_current_clue()
             is_solved = self.is_current_clue_filled()
-
-            print(
-                f"Navigation: {clue.number}{clue.direction}, "
-                f"Solved: {is_solved}"
-            )
 
             if not is_solved:
                 return True

@@ -4,42 +4,31 @@ import streamlit as st
 
 from llm_cw.utils.exolve_component import ExolveComponent
 
+
+@st.fragment(run_every="1s")
+def display_solver_log():
+    log_file = Path("solver_log.txt")
+
+    with st.container(height=600, border=True):
+        if log_file.exists():
+            messages = log_file.read_text(encoding="utf-8").splitlines()
+
+            for message in messages:
+                st.write(message)
+
 st.title("🧩 Crossword Solver (Algorithmic Baseline)")
+left_col, right_col = st.columns([2, 1])
+with left_col:
+    # --- upload .puz file ---
+    uploaded_file = st.file_uploader("Upload .puz file", type=["puz"])
 
+    if uploaded_file is not None:
+        exolve = ExolveComponent(uploaded_file)
+        exolve.display()
 
-# --- inputs ---
-clue_text = st.text_input("Clue", "Feline pet")
-length = st.number_input("Length", min_value=2, max_value=20, value=3)
-
-constraint_input = st.text_input(
-    "Constraints (format: 0:C,2:T)",
-    ""
-)
-
-
-# --- parse constraints ---
-def parse_constraints(text):
-    if not text.strip():
-        return None
-
-    constraints = {}
-    for part in text.split(","):
-        if ":" in part:
-            idx, letter = part.split(":")
-            constraints[int(idx.strip())] = letter.strip()
-
-    return constraints
-
-
-constraints = parse_constraints(constraint_input)
-
-
-# --- upload .puz file ---
-uploaded_file = st.file_uploader("Upload .puz file", type=["puz"])
-
-if uploaded_file is not None:
-    exolve = ExolveComponent(uploaded_file)
-    exolve.display()
+with right_col:
+    st.subheader("Solver Log")
+    display_solver_log()
 
 # --- solver configuration ---
 model = st.selectbox("Model", ["Default"], index=0)

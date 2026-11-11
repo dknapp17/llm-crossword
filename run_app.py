@@ -12,6 +12,15 @@ from llm_cw.utils.exolve_utils import ExolveController
 signal_file = Path("solve_requested.txt")
 signal_file.unlink(missing_ok=True)
 
+
+log_file = Path("solver_log.txt")
+log_file.write_text("")
+
+
+def log_message(message: str) -> None:
+    with log_file.open("a", encoding="utf-8") as f:
+        f.write(message + "\n")
+
 app = subprocess.Popen(
     [
         sys.executable,
@@ -42,7 +51,7 @@ try:
 
         signal_file.unlink()
 
-        print("Solve requested!")
+        log_message("Solve requested!")
 
         solver_config = controller.get_solver_config()
         solver = ToySolver(config=solver_config)
@@ -59,9 +68,15 @@ try:
 
             if answer.confidence > 0.1:
                 controller.enter_answer(answer.text)
-                print(f"High confidence ({answer.confidence:.2f})")
+                log_message(
+                    f"High confidence ({answer.confidence:.2f}) - entering answer "
+                    f"for {current_clue.number}{current_clue.direction}"
+                )
             else:
-                print(f"Low confidence ({answer.confidence:.2f}) - skipping")
+                log_message(
+                    f"Low confidence ({answer.confidence:.2f}) - skipping answer for "
+                    f"{current_clue.number}{current_clue.direction}"
+                )
 
             puzzle_complete = controller.is_puzzle_filled()
 
@@ -69,7 +84,7 @@ try:
                 controller.select_next_incomplete_clue()
 
         if puzzle_complete:
-            print("All squares are filled in!")
+            log_message("All squares are filled in!")
 
 
         page.pause()
