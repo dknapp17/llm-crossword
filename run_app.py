@@ -62,12 +62,16 @@ try:
                 print(f"High confidence ({answer.confidence:.2f})")
             else:
                 print(f"Low confidence ({answer.confidence:.2f}) - skipping")
-            controller.select_next_clue()
 
             puzzle_complete = controller.is_puzzle_filled()
 
+            if not puzzle_complete:
+                controller.select_next_incomplete_clue()
+
         if puzzle_complete:
             print("All squares are filled in!")
+
+
         page.pause()
 
         browser.close()

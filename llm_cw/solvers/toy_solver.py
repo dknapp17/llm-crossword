@@ -15,6 +15,7 @@ class ToySolver(BaseSolver):
         length = clue.length
         answer = "X" * length
         confidence = self.rng.random()
+        print(f"{clue.number}{clue.direction}: {confidence:.4f}")
 
         return SolverAnswer(
             text=answer,
