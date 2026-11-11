@@ -1,6 +1,7 @@
 from playwright.sync_api import Page
 
 from llm_cw.domain.crossword import AcrossDown, SolverClueInput, SolverConfig
+from llm_cw.utils.logging_utils import log_message
 
 
 class ExolveController:

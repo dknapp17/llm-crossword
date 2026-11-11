@@ -8,18 +8,11 @@ from playwright.sync_api import sync_playwright
 from llm_cw.domain.crossword import AcrossDown
 from llm_cw.solvers.toy_solver import ToySolver
 from llm_cw.utils.exolve_utils import ExolveController
+from llm_cw.utils.logging_utils import log_message
 
 signal_file = Path("solve_requested.txt")
 signal_file.unlink(missing_ok=True)
 
-
-log_file = Path("solver_log.txt")
-log_file.write_text("")
-
-
-def log_message(message: str) -> None:
-    with log_file.open("a", encoding="utf-8") as f:
-        f.write(message + "\n")
 
 app = subprocess.Popen(
     [
@@ -70,12 +63,12 @@ try:
                 controller.enter_answer(answer.text)
                 log_message(
                     f"High confidence ({answer.confidence:.2f}) - entering answer "
-                    f"for {current_clue.number}{current_clue.direction}"
+                    f"for {current_clue.number} {current_clue.direction._value_}"
                 )
             else:
                 log_message(
                     f"Low confidence ({answer.confidence:.2f}) - skipping answer for "
-                    f"{current_clue.number}{current_clue.direction}"
+                    f"{current_clue.number} {current_clue.direction._value_}"
                 )
 
             puzzle_complete = controller.is_puzzle_filled()
