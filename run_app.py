@@ -44,8 +44,8 @@ try:
 
         print("Solve requested!")
 
-        solver = ToySolver()
         solver_config = controller.get_solver_config()
+        solver = ToySolver(config=solver_config)
 
         frame = page.frame_locator("#exolve-frame")
 
@@ -55,9 +55,13 @@ try:
 
         while not puzzle_complete:
             current_clue = controller.read_current_clue()
-            answer = solver.solve_clue(current_clue, solver_config)
+            answer = solver.solve_clue(current_clue)
 
-            controller.enter_answer(answer)
+            if answer.confidence > 0.1:
+                controller.enter_answer(answer.text)
+                print(f"High confidence ({answer.confidence:.2f})")
+            else:
+                print(f"Low confidence ({answer.confidence:.2f}) - skipping")
             controller.select_next_clue()
 
             puzzle_complete = controller.is_puzzle_filled()

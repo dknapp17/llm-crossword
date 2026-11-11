@@ -80,6 +80,7 @@ class CrosswordPuzzleData:
 class SolverConfig:
     model: str  # ex: "Default"
     retrieval: str  # ex: "RAG"
+    solver_seed: int = 42  # default seed for reproducibility
 
 @dataclass
 class SolverClueInput:
@@ -93,6 +94,7 @@ class SolverAnswer:
     text: str  # ex: DEADHEAT
     length: int
     positional_text: dict[int, str]  # ex: {0: D, 1: E, 2: A, 3: D}
+    confidence: float = 0.0
 
 
 # Grid objects
