@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright
 from llm_cw.domain.crossword import AcrossDown
 from llm_cw.solvers.toy_solver import ToySolver
 from llm_cw.utils.exolve_utils import ExolveController
-from llm_cw.utils.logging_utils import log_message
+from llm_cw.utils.logging_utils import log_file, log_message
 
 signal_file = Path("solve_requested.txt")
 signal_file.unlink(missing_ok=True)
@@ -94,3 +94,4 @@ finally:
         puzzle.unlink(missing_ok=True)
 
     signal_file.unlink(missing_ok=True)
+    log_file.unlink(missing_ok=True)
