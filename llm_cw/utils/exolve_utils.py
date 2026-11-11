@@ -16,7 +16,7 @@ class ExolveController:
         clue.click()
 
     def select_next_clue(self) -> None:
-        pass
+        self.frame.locator("#xlv2-next").click(delay=500)
 
     def enter_answer(self, answer: str) -> None:
         grid_input = self.frame.locator("#xlv2-grid-input")
