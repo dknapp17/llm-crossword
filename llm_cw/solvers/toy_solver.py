@@ -1,6 +1,4 @@
-import random
-
-from llm_cw.domain.crossword import SolverAnswer, SolverClueInput, SolverConfig
+from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
 from llm_cw.solvers.solver import BaseSolver
 
 
