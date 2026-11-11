@@ -46,10 +46,14 @@ try:
         frame = page.frame_locator("#exolve-frame")
     
         controller.select_clue(AcrossDown.ACROSS, 32)
-    
+        current_clue = controller.read_current_clue()
+        print(current_clue)
         controller.enter_answer("CEROS")
+        current_clue = controller.read_current_clue()
+        print(current_clue)
         controller.select_next_clue()
-
+        current_clue = controller.read_current_clue()
+        print(current_clue)
         puzzle_complete = controller.is_puzzle_filled()
         if puzzle_complete:
             print('All squares are filled in!')
