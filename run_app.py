@@ -48,6 +48,7 @@ try:
         controller.select_clue(AcrossDown.ACROSS, 32)
     
         controller.enter_answer("CEROS")
+        controller.select_next_clue()
 
         puzzle_complete = controller.is_puzzle_filled()
         if puzzle_complete:
