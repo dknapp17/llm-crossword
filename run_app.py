@@ -6,6 +6,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 from llm_cw.domain.crossword import AcrossDown
+from llm_cw.solvers.toy_solver import ToySolver
 from llm_cw.utils.exolve_utils import ExolveController
 
 signal_file = Path("solve_requested.txt")
@@ -42,23 +43,27 @@ try:
         signal_file.unlink()
 
         print("Solve requested!")
-    
+
+        solver = ToySolver()
+        solver_config = controller.get_solver_config()
+
         frame = page.frame_locator("#exolve-frame")
-    
-        controller.select_clue(AcrossDown.ACROSS, 32)
-        current_clue = controller.read_current_clue()
-        print(current_clue)
-        controller.enter_answer("CEROS")
-        current_clue = controller.read_current_clue()
-        print(current_clue)
-        controller.select_next_clue()
-        current_clue = controller.read_current_clue()
-        print(current_clue)
-        puzzle_complete = controller.is_puzzle_filled()
+
+        # Assumes every puzzle has a 1 across
+        controller.select_clue(AcrossDown.ACROSS, 1)
+        puzzle_complete = False
+
+        while not puzzle_complete:
+            current_clue = controller.read_current_clue()
+            answer = solver.solve_clue(current_clue, solver_config)
+
+            controller.enter_answer(answer)
+            controller.select_next_clue()
+
+            puzzle_complete = controller.is_puzzle_filled()
+
         if puzzle_complete:
-            print('All squares are filled in!')
-        else:
-            print('Not all squares are filled in!')
+            print("All squares are filled in!")
         page.pause()
 
         browser.close()

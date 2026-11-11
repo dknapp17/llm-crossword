@@ -1,15 +1,19 @@
-from llm_cw.domain.crossword import ExolveAnswer, ExolveClue, SolverConfig
+from llm_cw.domain.crossword import SolverClueInput, SolverConfig
 from llm_cw.solvers.solver import BaseSolver
 
 
 class ToySolver(BaseSolver):
-    def solve(
-        self,
-        clue: ExolveClue,
-        config: SolverConfig,
-    ) -> ExolveAnswer:
+    def solve_puzzle(self, config: SolverConfig):
         """Used to demonstrate toy example of filling in X for every answer"""
-        length = clue.answer_length
-        toy_answer = "X" * length
-        answer = ExolveAnswer.from_str(toy_answer)
+        # This method can be implemented to solve the entire puzzle if needed
+        pass
+    
+    def solve_clue(
+        self,
+        clue: SolverClueInput,
+        config: SolverConfig,
+    ) -> str:
+        """Used to demonstrate toy example of filling in X for every answer"""
+        length = clue.length
+        answer = "X" * length
         return answer
