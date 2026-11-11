@@ -2,23 +2,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from llm_cw.domain.crossword import SolverClueInput
-from llm_cw.retrieval.wordlist import WordList
-from llm_cw.solvers.algorithmic_solver import AlgorithmicSolver
 from llm_cw.utils.exolve_component import ExolveComponent
-
-
-# --- load solver once ---
-@st.cache_resource
-def load_solver():
-    with open("data/wordlists/words.txt", "r") as f:
-        words = [w.strip() for w in f if w.strip()]
-
-    wordlist = WordList(words)
-    return AlgorithmicSolver(wordlist)
-
-
-solver = load_solver()
 
 st.title("🧩 Crossword Solver (Algorithmic Baseline)")
 
@@ -66,21 +50,3 @@ retrieval = st.selectbox("Retrieval", ["RAG"], index=0)
 
 if st.button("Solve Puzzle", disabled=uploaded_file is None):
     Path("solve_requested.txt").write_text("solve")
-
-# --- run solver for a single clue ---
-if st.button("Solve Clue"):
-    clue = SolverClueInput(
-        text=clue_text,
-        length=int(length),
-        positional_constraints=constraints,
-    )
-
-    results = solver.solve(clue)
-
-    st.subheader("Results")
-
-    if not results:
-        st.write("No matches found.")
-    else:
-        for r in results:
-            st.write(f"• {r.text}")

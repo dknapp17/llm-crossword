@@ -1,12 +1,24 @@
 from playwright.sync_api import Page
 
-from llm_cw.domain.crossword import AcrossDown, SolverClueInput
+from llm_cw.domain.crossword import AcrossDown, SolverClueInput, SolverConfig
 
 
 class ExolveController:
     def __init__(self, page: Page):
         self.page = page
         self.frame = page.frame_locator("#exolve-frame")
+
+    def _read_streamlit_dropdown(self, label):
+        dropdown = self.page.get_by_test_id("stSelectbox").filter(
+            has=self.page.get_by_text(label, exact=True)
+        )
+
+        return dropdown.locator('[data-baseweb="select"]').inner_text()
+    
+    def get_solver_config(self) -> SolverConfig:
+        model = self._read_streamlit_dropdown("Model")
+        retrieval = self._read_streamlit_dropdown("Retrieval")
+        return SolverConfig(model=model, retrieval=retrieval)
 
     def select_clue(self, direction: AcrossDown, number: int) -> None:
         clue = self.frame.locator(
