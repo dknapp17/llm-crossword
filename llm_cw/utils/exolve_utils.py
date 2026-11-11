@@ -18,7 +18,8 @@ class ExolveController:
     def get_solver_config(self) -> SolverConfig:
         model = self._read_streamlit_dropdown("Model")
         retrieval = self._read_streamlit_dropdown("Retrieval")
-        return SolverConfig(model=model, retrieval=retrieval)
+        solver_seed = 42
+        return SolverConfig(model=model, retrieval=retrieval, solver_seed=solver_seed)
 
     def select_clue(self, direction: AcrossDown, number: int) -> None:
         clue = self.frame.locator(
