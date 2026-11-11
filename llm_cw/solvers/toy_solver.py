@@ -1,4 +1,6 @@
-from llm_cw.domain.crossword import SolverClueInput, SolverConfig
+import random
+
+from llm_cw.domain.crossword import SolverAnswer, SolverClueInput, SolverConfig
 from llm_cw.solvers.solver import BaseSolver
 
 
@@ -12,8 +14,16 @@ class ToySolver(BaseSolver):
         self,
         clue: SolverClueInput,
         config: SolverConfig,
-    ) -> str:
+    ) -> SolverAnswer:
         """Used to demonstrate toy example of filling in X for every answer"""
         length = clue.length
         answer = "X" * length
-        return answer
+        random.seed(config.solver_seed)
+        confidence = random.random()
+
+        return SolverAnswer(
+            text=answer,
+            length=length,
+            positional_text={i: letter for i, letter in enumerate(answer)},
+            confidence=confidence
+        )

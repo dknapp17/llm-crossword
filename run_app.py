@@ -57,7 +57,7 @@ try:
             current_clue = controller.read_current_clue()
             answer = solver.solve_clue(current_clue, solver_config)
 
-            controller.enter_answer(answer)
+            controller.enter_answer(answer.text)
             controller.select_next_clue()
 
             puzzle_complete = controller.is_puzzle_filled()
