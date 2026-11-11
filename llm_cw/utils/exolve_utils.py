@@ -15,6 +15,12 @@ class ExolveController:
 
         clue.click()
 
+    def select_next_clue(self) -> None:
+        pass
+
     def enter_answer(self, answer: str) -> None:
         grid_input = self.frame.locator("#xlv2-grid-input")
         grid_input.press_sequentially(answer, delay=100)  # Add a delay of 100ms between key presses
+
+    def check_puzzle_state(self) -> None:
+        pass
