@@ -49,6 +49,11 @@ try:
     
         controller.enter_answer("CEROS")
 
+        puzzle_complete = controller.is_puzzle_filled()
+        if puzzle_complete:
+            print('All squares are filled in!')
+        else:
+            print('Not all squares are filled in!')
         page.pause()
 
         browser.close()

@@ -20,7 +20,10 @@ class ExolveController:
 
     def enter_answer(self, answer: str) -> None:
         grid_input = self.frame.locator("#xlv2-grid-input")
-        grid_input.press_sequentially(answer, delay=100)  # Add a delay of 100ms between key presses
+        # Add a delay of 100ms between key presses
+        grid_input.press_sequentially(answer, delay=100)  
 
-    def check_puzzle_state(self) -> None:
-        pass
+    def is_puzzle_filled(self) -> bool:
+        filled = int(self.frame.locator("#xlv2-status-num-filled").text_content())
+        total = int(self.frame.locator("#xlv2-status-num-total").text_content())
+        return filled == total
