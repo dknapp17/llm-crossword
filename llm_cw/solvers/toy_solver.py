@@ -1,6 +1,4 @@
-import random
-
-from llm_cw.domain.crossword import SolverAnswer, SolverClueInput, SolverConfig
+from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
 from llm_cw.solvers.solver import BaseSolver
 
 
@@ -17,6 +15,7 @@ class ToySolver(BaseSolver):
         length = clue.length
         answer = "X" * length
         confidence = self.rng.random()
+        print(f"{clue.number}{clue.direction}: {confidence:.4f}")
 
         return SolverAnswer(
             text=answer,

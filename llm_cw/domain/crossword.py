@@ -84,6 +84,8 @@ class SolverConfig:
 
 @dataclass
 class SolverClueInput:
+    number: int
+    direction: AcrossDown
     text: str  # ex: Feline
     length: int  # ex: 3
     positional_constraints: dict[int, str]  # ex: {0: C} for C _ _

@@ -31,7 +31,40 @@ class ExolveController:
     def select_next_clue(self) -> None:
         self.frame.locator("#xlv2-next").click(delay=500)
 
+    def _read_current_clue_id(self) -> tuple[int, AcrossDown]:
+        label = self.frame.locator("#xlv2-curr-clue-label").inner_text()
+
+        number = int(label.split("a")[0].split("d")[0])
+        direction = (
+            AcrossDown.ACROSS if "a" in label else AcrossDown.DOWN
+        )
+
+        return number, direction
+
+    def is_current_clue_filled(self) -> bool:
+        return self.frame.locator(
+            "#xlv2-curr-clue-label"
+        ).evaluate(
+            "(element) => element.classList.contains('xlv-solved')"
+        )
+    
+    def select_next_incomplete_clue(self) -> bool:
+        while True:
+            self.select_next_clue()
+
+            clue = self.read_current_clue()
+            is_solved = self.is_current_clue_filled()
+
+            print(
+                f"Navigation: {clue.number}{clue.direction}, "
+                f"Solved: {is_solved}"
+            )
+
+            if not is_solved:
+                return True
+    
     def read_current_clue(self) -> SolverClueInput:
+        number, direction = self._read_current_clue_id()
         clue_text = self.frame.locator(
             "#xlv2-curr-clue-text .xlv-clue-text-raw"
         ).text_content()
@@ -49,6 +82,8 @@ class ExolveController:
                 positional_constraints[i] = letter
 
         return SolverClueInput(
+            number=number,
+            direction=direction,
             text=clue_text.strip(),
             length=cells.count(),
             positional_constraints=positional_constraints,
