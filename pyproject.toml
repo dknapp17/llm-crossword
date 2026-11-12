@@ -12,6 +12,7 @@ dependencies = [
     "langchain-ollama>=0.3.10",
     "langchain-openai>=0.3.35",
     "loguru>=0.7.3",
+    "ollama>=0.6.2",
     "playwright>=1.60.0",
     "puzpy>=0.7.0",
     "pydantic-settings>=2.11.0",
@@ -34,3 +35,7 @@ select = ["E", "F", "I"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["llm_cw*"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
