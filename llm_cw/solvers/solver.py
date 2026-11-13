@@ -1,7 +1,7 @@
 import random
 from abc import ABC, abstractmethod
 
-from llm_cw.domain.crossword import ExolveAnswer, SolverClueInput, SolverConfig
+from llm_cw.domain.crossword import SolverAnswer, SolverClueInput, SolverConfig
 
 
 class BaseSolver(ABC):
@@ -13,7 +13,7 @@ class BaseSolver(ABC):
     def solve_clue(
         self,
         clue: SolverClueInput,
-    ) -> ExolveAnswer:
+    ) -> SolverAnswer:
         pass
 
     @abstractmethod
