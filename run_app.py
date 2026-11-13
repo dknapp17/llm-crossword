@@ -6,6 +6,8 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 from llm_cw.domain.crossword import AcrossDown
+from llm_cw.llm.ollama_client import OllamaClient
+from llm_cw.solvers.llm_solver import LLMSolver
 from llm_cw.solvers.toy_solver import ToySolver
 from llm_cw.utils.exolve_utils import ExolveController
 from llm_cw.utils.logging_utils import log_file, log_message
@@ -47,8 +49,9 @@ try:
         log_message("Solve requested!")
 
         solver_config = controller.get_solver_config()
-        solver = ToySolver(config=solver_config)
-
+        client = OllamaClient()
+        toy_solver = ToySolver(config=solver_config)
+        llm_solver = LLMSolver(config=solver_config, client=client)
         frame = page.frame_locator("#exolve-frame")
 
         # Assumes every puzzle has a 1 across
@@ -57,9 +60,9 @@ try:
 
         while not puzzle_complete:
             current_clue = controller.read_current_clue()
-            answer = solver.solve_clue(current_clue)
+            answer = llm_solver.solve_clue(current_clue)
 
-            if answer.confidence > 0.1:
+            if answer.confidence > 0.9:
                 controller.enter_answer(answer.text)
                 log_message(
                     f"High confidence ({answer.confidence:.2f}) - entering answer "
