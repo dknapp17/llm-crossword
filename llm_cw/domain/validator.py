@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
+from llm_cw.utils.logging_utils import log_message
 
 
 class BaseValidator(ABC):
@@ -20,6 +21,10 @@ class AnswerLengthValidator(BaseValidator):
     ) -> bool:
 
         if len(answer.text) != clue.length:
+            log_message(
+                f'Answer {answer.text} does not match expected length for clue '
+                f'{clue.number, clue.direction._value_}'
+            )
             return False
 
         return True
