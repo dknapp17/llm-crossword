@@ -16,7 +16,7 @@ def display_solver_log():
             for message in messages:
                 st.write(message)
 
-st.title("🧩 Crossword Solver (Algorithmic Baseline)")
+st.title("🧩 Crossword Solver (LLM Baseline)")
 left_col, right_col = st.columns([2, 1])
 with left_col:
     # --- upload .puz file ---
