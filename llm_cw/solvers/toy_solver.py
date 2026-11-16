@@ -1,14 +1,16 @@
+import random
+
 from llm_cw.domain.crossword import SolverAnswer, SolverClueInput
 from llm_cw.solvers.solver import BaseSolver
 from llm_cw.utils.logging_utils import log_message
 
 
 class ToySolver(BaseSolver):
-    def solve_puzzle(self):
-        """Used to demonstrate toy example of filling in X for every answer."""
-        pass
+    def __init__(self, config, validator):
+        super().__init__(config, validator)
+        self.rng = random.Random(config.solver_seed)
 
-    def solve_clue(
+    def _generate_answer(
         self,
         clue: SolverClueInput,
     ) -> SolverAnswer:
