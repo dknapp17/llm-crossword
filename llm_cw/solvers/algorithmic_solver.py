@@ -8,12 +8,12 @@ class AlgorithmicSolver(BaseSolver):
     def __init__(self, wordlist: WordList):
         self.wordlist = wordlist
 
-    def solve(self, clue: SolverClueInput) -> list[SolverAnswer]:
+    def solve_clue(self, clue: SolverClueInput) -> list[SolverAnswer]:
 
         words = self.wordlist.by_length(clue.length)
         words = self._filter_by_constraints(words, clue.positional_constraints)
 
-        return self._to_answers(words)
+        return self._generate_answer(words)
 
     def _filter_by_constraints(
         self,
@@ -34,7 +34,7 @@ class AlgorithmicSolver(BaseSolver):
 
         return result
 
-    def _to_answers(self, words: list[str]) -> list[SolverAnswer]:
+    def _generate_answer(self, words: list[str]) -> list[SolverAnswer]:
         return [
             SolverAnswer(
                 text=w.upper(),
@@ -42,4 +42,4 @@ class AlgorithmicSolver(BaseSolver):
                 positional_text={}
             )
             for w in words
-        ]
+        ][0]

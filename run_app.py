@@ -15,7 +15,7 @@ from llm_cw.llm.ollama_client import OllamaClient
 from llm_cw.solvers.llm_solver import LLMSolver
 from llm_cw.solvers.toy_solver import ToySolver
 from llm_cw.utils.exolve_utils import ExolveController
-from llm_cw.utils.logging_utils import log_file, log_message
+from llm_cw.utils.logging_utils import log_file, log_message, initialize_log
 
 signal_file = Path("solve_requested.txt")
 signal_file.unlink(missing_ok=True)
@@ -33,7 +33,7 @@ app = subprocess.Popen(
 
 exolve_dir = Path("app/static/exolve")
 existing_puzzles = set(exolve_dir.glob("*.puz"))
-
+initialize_log()
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
