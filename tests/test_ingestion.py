@@ -533,6 +533,8 @@ class TestToDocument(unittest.TestCase):
 
     def test_to_document(self):
         clue = SolverClueInput(
+            number=1,
+            direction=AcrossDown.ACROSS,
             text="Alex and ___ (jewelry company)",
             length=3,
             positional_constraints={},
@@ -546,6 +548,7 @@ class TestToDocument(unittest.TestCase):
                 "idx_1": "N",
                 "idx_2": "I",
             },
+            confidence=1.0
         )
 
         puzzle_data = CrosswordPuzzleData(

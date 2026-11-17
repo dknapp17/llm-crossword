@@ -1,7 +1,10 @@
 from pathlib import Path
 
 log_file = Path("solver_log.txt")
-log_file.write_text("")
+
+
+def initialize_log() -> None:
+    log_file.write_text("")
 
 
 def log_message(message: str) -> None:

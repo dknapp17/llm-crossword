@@ -2,6 +2,7 @@ import unittest
 
 from llm_cw.domain.validator import _validate_positional_constraints
 
+
 class TestValidatePositionalConstraints(unittest.TestCase):
     def test_valid_constraints(self):
         """CAT is valid when first letter must be C"""
