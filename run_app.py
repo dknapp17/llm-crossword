@@ -6,7 +6,11 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 from llm_cw.domain.crossword import AcrossDown
-from llm_cw.domain.validator import AnswerLengthValidator, AnswerValidator
+from llm_cw.domain.validator import (
+    AnswerLengthValidator,
+    AnswerValidator,
+    PositionalConstraintValidator,
+)
 from llm_cw.llm.ollama_client import OllamaClient
 from llm_cw.solvers.llm_solver import LLMSolver
 from llm_cw.solvers.toy_solver import ToySolver
@@ -51,7 +55,12 @@ try:
 
         solver_config = controller.get_solver_config()
         client = OllamaClient()
-        validator = AnswerValidator([AnswerLengthValidator()])
+        validator = AnswerValidator(
+            [
+                AnswerLengthValidator(),
+                PositionalConstraintValidator(),
+            ]
+        )
         toy_solver = ToySolver(config=solver_config, validator=validator)
         llm_solver = LLMSolver(config=solver_config, validator=validator, client=client)
         frame = page.frame_locator("#exolve-frame")
