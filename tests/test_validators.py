@@ -1,6 +1,9 @@
 import unittest
 
-from llm_cw.domain.validator import _validate_positional_constraints
+from llm_cw.domain.validator import (
+    _validate_grammatical_number,
+    _validate_positional_constraints,
+)
 
 
 class TestValidatePositionalConstraints(unittest.TestCase):
@@ -58,4 +61,20 @@ class TestValidatePositionalConstraints(unittest.TestCase):
             result = _validate_positional_constraints(answer_text,
                                                       positional_constraints)
             self.assertTrue(result)
+
+
+class TestValidateGrammaticalNumber(unittest.TestCase):
+
+    def test_grammatical_number_matches(self):
+        test_cases = [
+            ("Feline pet", "cat", "cats"),
+            ("Feline pets", "cats", "cat"),
+            ("Ancient symbols of royalty", "asps", "crow"),
+        ]
+
+        for clue, valid_answer, invalid_answer in test_cases:
+            with self.subTest(clue=clue):
+                self.assertTrue(_validate_grammatical_number(clue, valid_answer))
+                self.assertFalse(_validate_grammatical_number(clue, invalid_answer))
+
     

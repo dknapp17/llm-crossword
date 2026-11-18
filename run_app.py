@@ -9,6 +9,7 @@ from llm_cw.domain.crossword import AcrossDown
 from llm_cw.domain.validator import (
     AnswerLengthValidator,
     AnswerValidator,
+    GrammaticalNumberValidator,
     PositionalConstraintValidator,
 )
 from llm_cw.llm.ollama_client import OllamaClient
@@ -59,6 +60,7 @@ try:
             [
                 AnswerLengthValidator(),
                 PositionalConstraintValidator(),
+                GrammaticalNumberValidator(),
             ]
         )
         toy_solver = ToySolver(config=solver_config, validator=validator)
