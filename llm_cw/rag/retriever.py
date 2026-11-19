@@ -18,7 +18,8 @@ class ContextRetriever:
         query: str,
         k: int = 3,
         expand_to_n_queries: int = 3,
-        expand=False
+        expand=False,
+        rerank=False
     ) -> list[VectorSearchResult]:
 
         query_model = CrosswordQuery.from_str(query)
@@ -63,7 +64,7 @@ class ContextRetriever:
 
         n_k_documents = deduped
        
-        if len(n_k_documents) > 0:
+        if len(n_k_documents) > 0 and rerank:
             k_documents = self.rerank(
                 query=query_model,
                 docs=n_k_documents,

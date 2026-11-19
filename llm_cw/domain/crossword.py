@@ -79,7 +79,7 @@ class CrosswordPuzzleData:
 @dataclass
 class SolverConfig:
     model: str  # ex: "Default"
-    retrieval: str  # ex: "RAG"
+    retrieval: bool = False  # for RAG
     solver_seed: int = 42  # default seed for reproducibility
 
 @dataclass

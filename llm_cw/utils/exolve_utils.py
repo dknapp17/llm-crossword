@@ -17,7 +17,11 @@ class ExolveController:
     
     def get_solver_config(self) -> SolverConfig:
         model = self._read_streamlit_dropdown("Model")
-        retrieval = self._read_streamlit_dropdown("Retrieval")
+        st_retrieval = self._read_streamlit_dropdown("Retrieval")
+        if st_retrieval == 'RAG':
+            retrieval = True
+        else:
+            retrieval = False
         solver_seed = 42
         return SolverConfig(model=model, retrieval=retrieval, solver_seed=solver_seed)
 

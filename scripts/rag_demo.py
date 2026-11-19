@@ -6,7 +6,7 @@ from llm_cw.rag.retriever import ContextRetriever
 
 def main():
 
-    clue = "Military position"
+    clue = "Computer key"
 
     retriever = ContextRetriever()
 
