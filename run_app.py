@@ -9,13 +9,14 @@ from llm_cw.domain.crossword import AcrossDown
 from llm_cw.domain.validator import (
     AnswerLengthValidator,
     AnswerValidator,
+    GrammaticalNumberValidator,
     PositionalConstraintValidator,
 )
 from llm_cw.llm.ollama_client import OllamaClient
 from llm_cw.solvers.llm_solver import LLMSolver
 from llm_cw.solvers.toy_solver import ToySolver
 from llm_cw.utils.exolve_utils import ExolveController
-from llm_cw.utils.logging_utils import log_file, log_message, initialize_log
+from llm_cw.utils.logging_utils import initialize_log, log_file, log_message
 
 signal_file = Path("solve_requested.txt")
 signal_file.unlink(missing_ok=True)
@@ -59,6 +60,7 @@ try:
             [
                 AnswerLengthValidator(),
                 PositionalConstraintValidator(),
+                GrammaticalNumberValidator(),
             ]
         )
         toy_solver = ToySolver(config=solver_config, validator=validator)
